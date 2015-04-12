@@ -18,17 +18,18 @@ const int gMaxLength = 16;
  * ([97..122] in ASCII)
  */
 
-std::string sendPassword(std::string pass) {
+// Return value of true means a password matched
+bool sendPassword(std::string pass) {
     std::string hash = md5(pass);
 
     if (hash == "a7a189951821c2ebf7bf3167ec3f9fbe" ||
         hash == "5f4dcc3b5aa765d61d8327deb882cf99" ||
         hash == "3b11bfdbd675feb0297894dac03a8c04" ||
         hash == "97d3b89397f99594a4981fc6b0cb31b0") {
-        return "yes";
+        return true;
     }
     else {
-        return "no";
+        return false;
     }
 }
 
@@ -123,7 +124,7 @@ void run(char beginChar, char endChar) {
                 return;
             }
 
-            if (sendPassword(password) == "yes") {
+            if (sendPassword(password)) {
                 std::cout << password << " is a password" << std::endl;
                 passwordsFound++;
 

@@ -22,7 +22,7 @@ CFLAGS_RELEASE := -O3 -Wall -s -std=c11 -flto
 
 CXX := g++
 CXXFLAGS_DEBUG := -O0 -g3 -Wall -std=c++1y
-CXXFLAGS_RELEASE := -O3 -g3 -Wall -s -std=c++1y -flto
+CXXFLAGS_RELEASE := -O3 -Wall -s -std=c++1y -flto
 
 RC := windres
 
