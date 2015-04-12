@@ -5,45 +5,29 @@
 #include <chrono>
 #include <thread>
 #include <future>
-#include <SFML/Network/TcpSocket.hpp>
-#include <SFML/Network/IpAddress.hpp>
+
+#include "md5.h"
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
 std::vector<std::string> words;
 
-std::string sendPassword(sf::TcpSocket& socket, std::string pass) {
-    socket.send(pass.c_str(), pass.length());
+std::string sendPassword(std::string pass) {
+    std::string hash = md5(pass);
 
-    std::string reply;
-    char c = 0;
-    size_t received = 0;
-    while (c != '\n') {
-        sf::Socket::Status status = socket.receive(&c, sizeof(c), received);
-        if (status == sf::Socket::Done) {
-            if (c != '\n') {
-                reply += c;
-            }
-        }
+    if (hash == "a7a189951821c2ebf7bf3167ec3f9fbe" ||
+        hash == "5f4dcc3b5aa765d61d8327deb882cf99" ||
+        hash == "3b11bfdbd675feb0297894dac03a8c04" ||
+        hash == "97d3b89397f99594a4981fc6b0cb31b0") {
+        return "yes";
     }
-
-    return reply;
+    else {
+        return "no";
+    }
 }
 
 void run() {
-    sf::TcpSocket socket;
-
-    sf::Socket::Status status = socket.connect(sf::IpAddress("127.0.0.1"),
-            58999);
-    if (status == sf::Socket::Done) {
-        std::cout << "Connecting to server..." << std::endl;
-    }
-    else {
-        std::cout << "Run the server first." << std::endl;
-        return;
-    }
-
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
     time_point<clock> lastTime = currentTime;
@@ -60,11 +44,10 @@ void run() {
             password.clear();
 
             if (currentNum == -1) {
-                reply = sendPassword(socket, word + '\n');
+                reply = sendPassword(word);
             }
             else {
-                reply = sendPassword(socket,
-                        word + std::to_string(currentNum) + '\n');
+                reply = sendPassword(word + std::to_string(currentNum));
             }
 
             if (reply == "yes") {
