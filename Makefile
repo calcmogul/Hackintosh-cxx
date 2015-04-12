@@ -41,7 +41,7 @@ ifeq ($(OS), Windows_NT)
 	EXEC := $(NAME).exe
 else
         # Specify Linux libs with -l directives here
-	LDFLAGS := -lsfml-network -lsfml-system
+	LDFLAGS := -pthread
 
 ifeq ($(strip $(PREFIX)),)
         # Assign executable name
