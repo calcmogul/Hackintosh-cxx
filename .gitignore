@@ -1,0 +1,10 @@
+*.log
+*.a
+*.dll
+*.d
+*.o
+
+/Debug/
+/Release/
+.settings/
+*.swp
