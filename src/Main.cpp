@@ -64,6 +64,7 @@ char incSearchSpaceSlot(char pos) {
  * 'endChar' determines where to stop.
  */
 void run(char beginChar, char endChar) {
+    // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
     time_point<clock> lastTime = currentTime;
@@ -75,6 +76,7 @@ void run(char beginChar, char endChar) {
     nameStub += '-';
     nameStub += endChar;
 
+    // Load last checkpoint
     std::fstream save(nameStub + ".txt", std::fstream::in);
     if (save.is_open()) {
         std::string buffer;
@@ -97,9 +99,11 @@ void run(char beginChar, char endChar) {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
+    // Reopen checkpoint file for writing
     save.close();
     save.open(nameStub + ".txt", std::fstream::out | std::fstream::app);
 
+    // Open password output file
     std::ofstream passwords(nameStub + "-passwds.txt",
             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
@@ -194,6 +198,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::future<void>> threads;
     unsigned int threadCount = 10;
 
+    // Spawn worker threads
     for (const auto& arg : args) {
         unsigned int beginPos = std::round(std::stoi(arg) *
                 (36.0 / threadCount));
