@@ -14,6 +14,8 @@ using namespace std::chrono_literals;
 
 const int gMaxLength = 16;
 
+std::vector<std::string> words;
+
 /* Try each number ([48..57] in ASCII) and lower case letter
  * ([97..122] in ASCII)
  */
@@ -22,10 +24,7 @@ const int gMaxLength = 16;
 bool sendPassword(std::string pass) {
     std::string hash = md5(pass);
 
-    if (hash == "a7a189951821c2ebf7bf3167ec3f9fbe" ||
-        hash == "5f4dcc3b5aa765d61d8327deb882cf99" ||
-        hash == "3b11bfdbd675feb0297894dac03a8c04" ||
-        hash == "97d3b89397f99594a4981fc6b0cb31b0") {
+    if (hash == "97d3b89397f99594a4981fc6b0cb31b0") {
         return true;
     }
     else {
@@ -63,7 +62,7 @@ char incSearchSpaceSlot(char pos) {
 /* 'beginChar' determines where to start brute-force attack in search space.
  * 'endChar' determines where to stop.
  */
-void run(char beginChar, char endChar) {
+void runBruteforce(char beginChar, char endChar) {
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
@@ -186,13 +185,105 @@ void run(char beginChar, char endChar) {
     }
 }
 
+void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
+    // Prepare timing for checkpoints
+    using clock = std::chrono::system_clock;
+    time_point<clock> currentTime = clock::now();
+    time_point<clock> lastTime = currentTime;
+
+    char passwordsFound = 0;
+    std::string numSuffix;
+    numSuffix.reserve(gMaxLength);
+
+    std::string nameStub = std::to_string(dictBegin);
+    nameStub += '-';
+    nameStub += std::to_string(dictEnd);
+
+    // Load last checkpoint
+    std::fstream save(nameStub + ".txt", std::fstream::in);
+    if (save.is_open()) {
+        std::string buffer;
+        std::string checkpoint;
+
+        while (std::getline(save, buffer)) {
+            checkpoint = buffer;
+        }
+        save.clear();
+
+        if (checkpoint.size() > 0) {
+            std::cout << "Restored from latest password: " << checkpoint << std::endl;
+            numSuffix = checkpoint;
+        }
+        else {
+            numSuffix = std::to_string(-1);
+        }
+    }
+    else {
+        std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
+    }
+
+    // Reopen checkpoint file for writing
+    save.close();
+    save.open(nameStub + ".txt", std::fstream::out | std::fstream::app);
+
+    // Open password output file
+    std::ofstream passwords(nameStub + "-passwds.txt",
+            std::fstream::out | std::ofstream::app);
+    if (!passwords.is_open()) {
+        std::cout << "Failed to open " << nameStub + "-passwds.txt" << std::endl;
+        exit(1);
+    }
+
+    for (int currentNum = std::stoi(numSuffix); currentNum <= 1000000;
+            currentNum++) {
+        numSuffix = std::to_string(currentNum);
+
+        for (unsigned int i = dictBegin; i <= dictEnd; i++) {
+            if (passwordsFound == 4) {
+                return;
+            }
+
+            if (sendPassword(words[i] + numSuffix)) {
+                std::cout << words[i] + numSuffix << " is a password" << std::endl;
+                passwordsFound++;
+
+                // Save password
+                passwords << words[i] + numSuffix;
+                passwords.flush();
+            }
+
+            currentTime = clock::now();
+            if (currentTime - lastTime > 1min) {
+                std::cout << "checkpoint: " << numSuffix << std::endl;
+                save << numSuffix << '\n';
+                save.flush();
+
+                lastTime = currentTime;
+            }
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
 
     if (args.size() == 0) {
         std::cout << "There are 10 possible work units (0..9 inclusive). Pass"
                      "a space delimited list of the ones to run." << std::endl;
-        exit(0);
+        return 0;
+    }
+
+    std::ifstream dict("dictionary.txt");
+    if (dict.is_open()) {
+        std::string buffer;
+        words.reserve(349900);
+        while (std::getline(dict, buffer)) {
+            words.push_back(buffer);
+        }
+    }
+    else {
+        std::cout << "Failed to open dictionary." << std::endl;
+        return 0;
     }
 
     std::vector<std::future<void>> threads;
@@ -205,7 +296,7 @@ int main(int argc, char* argv[]) {
         unsigned int endPos = std::round((std::stoi(arg) + 1) *
                 (36.0 / threadCount)) - 1;
 
-        threads.emplace_back(std::async(std::launch::async, run,
+        threads.emplace_back(std::async(std::launch::async, runBruteforce,
                 cvtSearchSpacePosToASCII(beginPos),
                 cvtSearchSpacePosToASCII(endPos)));
     }
