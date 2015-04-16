@@ -29,7 +29,7 @@ bool sendPassword(std::string pass) {
     MD5 md5 = MD5(pass);
 
     if (*reinterpret_cast<__uint128_t*>(md5.getDigest()) ==
-            *reinterpret_cast<__uint128_t*>(hash)) {
+        *reinterpret_cast<__uint128_t*>(hash)) {
         return true;
     }
     else {
@@ -92,7 +92,8 @@ void runBruteforce(char beginChar, char endChar) {
         save.clear();
 
         if (checkpoint.size() > 0) {
-            std::cout << "Restored from latest password: " << checkpoint << std::endl;
+            std::cout << "Restored from latest password: " << checkpoint <<
+            std::endl;
             password = checkpoint;
         }
         else {
@@ -110,9 +111,10 @@ void runBruteforce(char beginChar, char endChar) {
 
     // Open password output file
     std::ofstream passwords(nameStub + "-passwds.txt",
-            std::fstream::out | std::ofstream::app);
+                            std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
-        std::cout << "Failed to open " << nameStub + "-passwds.txt" << std::endl;
+        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
+        std::endl;
         exit(1);
     }
 
@@ -214,7 +216,8 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
         save.clear();
 
         if (checkpoint.size() > 0) {
-            std::cout << "Restored from latest password: " << checkpoint << std::endl;
+            std::cout << "Restored from latest password: " << checkpoint <<
+            std::endl;
             numSuffix = checkpoint;
         }
 
@@ -229,14 +232,15 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
 
     // Open password output file
     std::ofstream passwords(nameStub + "-passwds.txt",
-            std::fstream::out | std::ofstream::app);
+                            std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
-        std::cout << "Failed to open " << nameStub + "-passwds.txt" << std::endl;
+        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
+        std::endl;
         exit(1);
     }
 
-    for (int currentNum = std::stoi(numSuffix); currentNum <= 7200000;
-            currentNum++) {
+    for (int currentNum = std::stoi(numSuffix); currentNum <= 1000;
+         currentNum++) {
         numSuffix = std::to_string(currentNum);
 
         for (unsigned int i = dictBegin; i <= dictEnd; i++) {
@@ -246,7 +250,8 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
 
             if (currentNum != -1) {
                 if (sendPassword(words[i] + numSuffix)) {
-                    std::cout << words[i] + numSuffix << " is a password" << std::endl;
+                    std::cout << words[i] + numSuffix << " is a password" <<
+                    std::endl;
                     passwordsFound++;
 
                     // Save password
@@ -299,9 +304,9 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    //std::string hashStr = "a7a189951821c2ebf7bf3167ec3f9fbe";
-    //std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
-    //std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
+    // std::string hashStr = "a7a189951821c2ebf7bf3167ec3f9fbe";
+    // std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
+    // std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
     std::string hashStr = "97d3b89397f99594a4981fc6b0cb31b0";
     for (unsigned int i = 0; i < 16; i++) {
         hash[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
@@ -313,21 +318,21 @@ int main(int argc, char* argv[]) {
     // Spawn worker threads
     for (const auto& arg : args) {
         /*unsigned int beginPos = std::round(std::stoi(arg) *
-                (36.0 / threadCount));
-        unsigned int endPos = std::round((std::stoi(arg) + 1) *
-                (36.0 / threadCount)) - 1;
-
-        threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                cvtSearchSpacePosToASCII(beginPos),
-                cvtSearchSpacePosToASCII(endPos)));*/
+         *       (36.0 / threadCount));
+         *  unsigned int endPos = std::round((std::stoi(arg) + 1) *
+         *       (36.0 / threadCount)) - 1;
+         *
+         *  threads.emplace_back(std::async(std::launch::async, runBruteforce,
+         *       cvtSearchSpacePosToASCII(beginPos),
+         *       cvtSearchSpacePosToASCII(endPos)));*/
 
         unsigned int beginPos = std::round(std::stoi(arg) *
-                (349900.0 / threadCount));
+                                           (349900.0 / threadCount));
         unsigned int endPos = std::round((std::stoi(arg) + 1) *
-                (349900.0 / threadCount)) - 1;
+                                         (349900.0 / threadCount)) - 1;
 
         threads.emplace_back(std::async(std::launch::async, runDictionary,
-                beginPos, endPos));
+                                        beginPos, endPos));
     }
 
     bool threadsDead = false;
@@ -343,3 +348,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
