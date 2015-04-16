@@ -331,6 +331,14 @@ MD5& MD5::finalize()
 
 //////////////////////////////
 
+// return digest
+unsigned char* MD5::getDigest()
+{
+    return digest;
+}
+
+//////////////////////////////
+
 // return hex representation of digest as string
 std::string MD5::hexdigest() const
 {

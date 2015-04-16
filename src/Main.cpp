@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <future>
+#include <atomic>
 #include <cmath>
 
 #include "md5.h"
@@ -13,6 +14,7 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 
 const int gMaxLength = 16;
+std::atomic<char> passwordsFound{0};
 
 std::vector<std::string> words;
 
@@ -20,11 +22,14 @@ std::vector<std::string> words;
  * ([97..122] in ASCII)
  */
 
+uint8_t hash[16];
+
 // Return value of true means a password matched
 bool sendPassword(std::string pass) {
-    std::string hash = md5(pass);
+    MD5 md5 = MD5(pass);
 
-    if (hash == "97d3b89397f99594a4981fc6b0cb31b0") {
+    if (*reinterpret_cast<__uint128_t*>(md5.getDigest()) ==
+            *reinterpret_cast<__uint128_t*>(hash)) {
         return true;
     }
     else {
@@ -93,13 +98,14 @@ void runBruteforce(char beginChar, char endChar) {
         else {
             password = beginChar;
         }
+
+        save.close();
     }
     else {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
     // Reopen checkpoint file for writing
-    save.close();
     save.open(nameStub + ".txt", std::fstream::out | std::fstream::app);
 
     // Open password output file
@@ -113,8 +119,6 @@ void runBruteforce(char beginChar, char endChar) {
     std::string endPassword(password.length(), endChar);
 
     std::cout << "Started computation" << std::endl;
-
-    char passwordsFound = 0;
 
     while (password.length() <= gMaxLength) {
         bool overflow = false;
@@ -191,11 +195,10 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
     time_point<clock> currentTime = clock::now();
     time_point<clock> lastTime = currentTime;
 
-    char passwordsFound = 0;
-    std::string numSuffix;
-    numSuffix.reserve(gMaxLength);
+    std::string numSuffix = "-1";
 
-    std::string nameStub = std::to_string(dictBegin);
+    std::string nameStub = "dict-";
+    nameStub += std::to_string(dictBegin);
     nameStub += '-';
     nameStub += std::to_string(dictEnd);
 
@@ -214,16 +217,14 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
             std::cout << "Restored from latest password: " << checkpoint << std::endl;
             numSuffix = checkpoint;
         }
-        else {
-            numSuffix = std::to_string(-1);
-        }
+
+        save.close();
     }
     else {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
     // Reopen checkpoint file for writing
-    save.close();
     save.open(nameStub + ".txt", std::fstream::out | std::fstream::app);
 
     // Open password output file
@@ -243,13 +244,25 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                 return;
             }
 
-            if (sendPassword(words[i] + numSuffix)) {
-                std::cout << words[i] + numSuffix << " is a password" << std::endl;
-                passwordsFound++;
+            if (currentNum != -1) {
+                if (sendPassword(words[i] + numSuffix)) {
+                    std::cout << words[i] + numSuffix << " is a password" << std::endl;
+                    passwordsFound++;
 
-                // Save password
-                passwords << words[i] + numSuffix;
-                passwords.flush();
+                    // Save password
+                    passwords << words[i] + numSuffix;
+                    passwords.flush();
+                }
+            }
+            else {
+                if (sendPassword(words[i])) {
+                    std::cout << words[i] << " is a password" << std::endl;
+                    passwordsFound++;
+
+                    // Save password
+                    passwords << words[i];
+                    passwords.flush();
+                }
             }
 
             currentTime = clock::now();
@@ -286,19 +299,35 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    //std::string hashStr = "a7a189951821c2ebf7bf3167ec3f9fbe";
+    //std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
+    //std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
+    std::string hashStr = "97d3b89397f99594a4981fc6b0cb31b0";
+    for (unsigned int i = 0; i < 16; i++) {
+        hash[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
+    }
+
     std::vector<std::future<void>> threads;
     unsigned int threadCount = 10;
 
     // Spawn worker threads
     for (const auto& arg : args) {
-        unsigned int beginPos = std::round(std::stoi(arg) *
+        /*unsigned int beginPos = std::round(std::stoi(arg) *
                 (36.0 / threadCount));
         unsigned int endPos = std::round((std::stoi(arg) + 1) *
                 (36.0 / threadCount)) - 1;
 
         threads.emplace_back(std::async(std::launch::async, runBruteforce,
                 cvtSearchSpacePosToASCII(beginPos),
-                cvtSearchSpacePosToASCII(endPos)));
+                cvtSearchSpacePosToASCII(endPos)));*/
+
+        unsigned int beginPos = std::round(std::stoi(arg) *
+                (349900.0 / threadCount));
+        unsigned int endPos = std::round((std::stoi(arg) + 1) *
+                (349900.0 / threadCount)) - 1;
+
+        threads.emplace_back(std::async(std::launch::async, runDictionary,
+                beginPos, endPos));
     }
 
     bool threadsDead = false;

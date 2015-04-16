@@ -57,6 +57,7 @@ public:
   void update(const unsigned char *buf, size_type length);
   void update(const char *buf, size_type length);
   MD5& finalize();
+  unsigned char* getDigest();
   std::string hexdigest() const;
   friend std::ostream& operator<<(std::ostream&, MD5 md5);
 
