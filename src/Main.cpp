@@ -93,7 +93,7 @@ void runBruteforce(char beginChar, char endChar) {
 
         if (checkpoint.size() > 0) {
             std::cout << "Restored from latest password: " << checkpoint <<
-            std::endl;
+                std::endl;
             password = checkpoint;
         }
         else {
@@ -114,7 +114,7 @@ void runBruteforce(char beginChar, char endChar) {
                             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
         std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
-        std::endl;
+            std::endl;
         exit(1);
     }
 
@@ -217,7 +217,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
 
         if (checkpoint.size() > 0) {
             std::cout << "Restored from latest password: " << checkpoint <<
-            std::endl;
+                std::endl;
             numSuffix = checkpoint;
         }
 
@@ -235,7 +235,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
         std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
-        std::endl;
+            std::endl;
         exit(1);
     }
 
@@ -251,7 +251,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
             if (currentNum != -1) {
                 if (sendPassword(words[i] + numSuffix)) {
                     std::cout << words[i] + numSuffix << " is a password" <<
-                    std::endl;
+                        std::endl;
                     passwordsFound++;
 
                     // Save password
