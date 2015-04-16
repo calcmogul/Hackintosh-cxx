@@ -235,7 +235,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
         exit(1);
     }
 
-    for (int currentNum = std::stoi(numSuffix); currentNum <= 1000000;
+    for (int currentNum = std::stoi(numSuffix); currentNum <= 7200000;
             currentNum++) {
         numSuffix = std::to_string(currentNum);
 
