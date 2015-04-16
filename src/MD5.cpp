@@ -32,6 +32,7 @@
 
 #include "MD5.hpp"
 
+#include <cstring>
 #include <cstdio>
 
 // Constants for MD5Transform routine.
@@ -242,7 +243,7 @@ void MD5::transform(const uint8_t block[blocksize]) {
     memset(x, 0, sizeof x);
 }
 
-// MD5 block update operation. Continues an MD5 message-m_digest
+// MD5 block update operation. Continues an MD5 message-digest
 // operation, processing another message block
 void MD5::update(const unsigned char input[], size_type length) {
     // compute number of bytes mod 64
@@ -254,7 +255,7 @@ void MD5::update(const unsigned char input[], size_type length) {
     }
     m_count[1] += (length >> 29);
 
-    // number of bytes we need to fill in m_buffer
+    // number of bytes we need to fill in buffer
     size_type firstpart = 64 - index;
 
     size_type i;
@@ -276,7 +277,7 @@ void MD5::update(const unsigned char input[], size_type length) {
         i = 0;
     }
 
-    // m_buffer remaining input
+    // buffer remaining input
     memcpy(&m_buffer[index], &input[i], length - i);
 }
 
@@ -285,8 +286,9 @@ void MD5::update(const char input[], size_type length) {
     update((const unsigned char*) input, length);
 }
 
-// MD5 finalization. Ends an MD5 message-m_digest operation, writing the
-// the message m_digest and zeroizing the context.
+/* MD5 finalization. Ends an MD5 message-m_digest operation, writing the message
+ * digest and zeroizing the context.
+ */
 MD5& MD5::finalize() {
     static unsigned char padding[64] = {
         0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
