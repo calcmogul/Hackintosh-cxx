@@ -8,7 +8,7 @@
 #include <atomic>
 #include <cmath>
 
-#include "md5.h"
+#include "MD5.hpp"
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
