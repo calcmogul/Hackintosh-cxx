@@ -72,6 +72,7 @@ void runBruteforce(char beginChar, char endChar) {
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
     time_point<clock> lastTime = currentTime;
+    time_point<clock> startTime = currentTime;
 
     std::string password;
     password.reserve(gMaxLength);
@@ -189,6 +190,12 @@ void runBruteforce(char beginChar, char endChar) {
             c = beginChar;
         }
     }
+
+    std::cout << "elapsed: "
+              << duration_cast<milliseconds>(currentTime - startTime).count() /
+        1000.f
+              << "s"
+              << std::endl;
 }
 
 void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
@@ -196,6 +203,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
     time_point<clock> lastTime = currentTime;
+    time_point<clock> startTime = currentTime;
 
     std::string numSuffix = "-1";
 
@@ -280,13 +288,20 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
             }
         }
     }
+
+    std::cout << "elapsed: "
+              << duration_cast<milliseconds>(currentTime - startTime).count() /
+        1000.f
+              << "s"
+              << std::endl;
 }
 
 int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
 
-    if (args.size() == 0) {
-        std::cout << "There are 10 possible work units (0..9 inclusive). Pass"
+    if (args.size() < 2) {
+        std::cout << "usage: Hackintosh-cxx (brute|dict) <WU> [<WU>...]\n"
+                     "There are 10 possible work units (0..9 inclusive). Pass"
                      "a space delimited list of the ones to run." << std::endl;
         return 0;
     }
@@ -316,23 +331,26 @@ int main(int argc, char* argv[]) {
     unsigned int threadCount = 10;
 
     // Spawn worker threads
-    for (const auto& arg : args) {
-        /*unsigned int beginPos = std::round(std::stoi(arg) *
-         *       (36.0 / threadCount));
-         *  unsigned int endPos = std::round((std::stoi(arg) + 1) *
-         *       (36.0 / threadCount)) - 1;
-         *
-         *  threads.emplace_back(std::async(std::launch::async, runBruteforce,
-         *       cvtSearchSpacePosToASCII(beginPos),
-         *       cvtSearchSpacePosToASCII(endPos)));*/
+    for (unsigned int i = 1; i < args.size(); i++) {
+        if (args[0] == "brute") {
+            unsigned int beginPos = std::round(std::stoi(args[i]) *
+                                               (36.0 / threadCount));
+            unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
+                                             (36.0 / threadCount)) - 1;
 
-        unsigned int beginPos = std::round(std::stoi(arg) *
-                                           (349900.0 / threadCount));
-        unsigned int endPos = std::round((std::stoi(arg) + 1) *
-                                         (349900.0 / threadCount)) - 1;
+            threads.emplace_back(std::async(std::launch::async, runBruteforce,
+                                            cvtSearchSpacePosToASCII(beginPos),
+                                            cvtSearchSpacePosToASCII(endPos)));
+        }
+        else if (args[0] == "dict") {
+            unsigned int beginPos = std::floor(std::stoi(args[i]) *
+                                               (349900.0 / threadCount));
+            unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
+                                            (349900.0 / threadCount)) - 1;
 
-        threads.emplace_back(std::async(std::launch::async, runDictionary,
-                                        beginPos, endPos));
+            threads.emplace_back(std::async(std::launch::async, runDictionary,
+                                            beginPos, endPos));
+        }
     }
 
     bool threadsDead = false;
