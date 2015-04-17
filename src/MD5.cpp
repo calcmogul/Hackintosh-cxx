@@ -286,7 +286,7 @@ void MD5::update(const char input[], size_type length) {
     update((const unsigned char*) input, length);
 }
 
-/* MD5 finalization. Ends an MD5 message-m_digest operation, writing the message
+/* MD5 finalization. Ends an MD5 message-digest operation, writing the message
  * digest and zeroizing the context.
  */
 MD5& MD5::finalize() {
@@ -310,7 +310,7 @@ MD5& MD5::finalize() {
         update(bits, 8);
 
         // Store state in digest
-        encode((uint8_t*)&m_digest, m_state, 16);
+        encode((uint8_t*) &m_digest, m_state, 16);
 
         // Zeroize sensitive information.
         memset(m_buffer, 0, sizeof m_buffer);
@@ -322,7 +322,8 @@ MD5& MD5::finalize() {
     return *this;
 }
 
-// return m_digest
+// return digest
 uint128_t MD5::getDigest() {
     return m_digest;
 }
+

@@ -67,11 +67,11 @@ private:
     static void decode(uint32_t output[], const uint8_t input[], size_type len);
     static void encode(uint8_t output[], const uint32_t input[], size_type len);
 
-    bool m_finalized;
     uint8_t m_buffer[blocksize]; // bytes that didn't fit in last 64 byte chunk
     uint32_t m_count[2]; // 64bit counter for number of bits (lo, hi)
     uint32_t m_state[4]; // digest so far
     uint128_t m_digest; // the result
+    bool m_finalized;
 
     // low level logic operations
     static inline uint32_t F(uint32_t x, uint32_t y, uint32_t z);
