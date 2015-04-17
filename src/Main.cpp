@@ -24,18 +24,6 @@ std::vector<std::string> words;
 
 uint128_t hash;
 
-// Return value of true means a password matched
-bool sendPassword(std::string pass) {
-    MD5 md5 = MD5(pass);
-
-    if (md5.getDigest() == hash) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 /* Converts index in [0..35] to ASCII table range of [48..57] and [97..122]
  * (Numbers and lowercase letters)
  */
@@ -75,6 +63,7 @@ void runBruteforce(char beginChar, char endChar) {
 
     std::string password;
     password.reserve(gMaxLength);
+    password += beginChar;
 
     std::string nameStub(1, beginChar);
     nameStub += '-';
@@ -120,12 +109,19 @@ void runBruteforce(char beginChar, char endChar) {
 
     std::string endPassword(password.length(), endChar);
 
+    /* Used by thread to determine when searching a segment has been completed.
+     * If password starts at 'd', 'd0', 'd00', etc. then endHash should contain
+     * 'd', 'dz', 'dzz', etc.
+     */
+    uint128_t endHash = 0;
+
     std::cout << "Started computation" << std::endl;
 
     while (password.length() <= gMaxLength) {
         bool overflow = false;
         while (!overflow) {
-            if (password == endPassword) {
+            MD5 md5 = MD5(password);
+            if (md5.getDigest() == endHash) {
                 break;
             }
 
@@ -133,7 +129,7 @@ void runBruteforce(char beginChar, char endChar) {
                 return;
             }
 
-            if (sendPassword(password)) {
+            if (md5.getDigest() == hash) {
                 std::cout << password << " is a password" << std::endl;
                 passwordsFound++;
 
@@ -181,12 +177,15 @@ void runBruteforce(char beginChar, char endChar) {
         }
 
         // Increase string size, then reset string
-        password += beginChar;
-        endPassword += endChar;
+        password += '0';
+        endPassword += 'z';
+        MD5 md5 = MD5(endPassword);
+        endHash = md5.getDigest();
 
         // Set all characters in string to start of this thread's partition
-        for (auto& c : password) {
-            c = beginChar;
+        password[0] = beginChar;
+        for (unsigned int i = 1; i < password.length(); i++) {
+            password[i] = '0';
         }
     }
 
@@ -256,7 +255,8 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
             }
 
             if (currentNum != -1) {
-                if (sendPassword(words[i] + numSuffix)) {
+                MD5 md5 = MD5(words[i] + numSuffix);
+                if (md5.getDigest() == hash) {
                     std::cout << words[i] + numSuffix << " is a password" <<
                         std::endl;
                     passwordsFound++;
@@ -267,7 +267,8 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                 }
             }
             else {
-                if (sendPassword(words[i])) {
+                MD5 md5 = MD5(words[i]);
+                if (md5.getDigest() == hash) {
                     std::cout << words[i] << " is a password" << std::endl;
                     passwordsFound++;
 
