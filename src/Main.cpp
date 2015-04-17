@@ -28,8 +28,7 @@ uint8_t hash[16];
 bool sendPassword(std::string pass) {
     MD5 md5 = MD5(pass);
 
-    if (*reinterpret_cast<__uint128_t*>(md5.getDigest()) ==
-        *reinterpret_cast<__uint128_t*>(hash)) {
+    if (md5.getDigest() == *reinterpret_cast<uint128_t*>(hash)) {
         return true;
     }
     else {

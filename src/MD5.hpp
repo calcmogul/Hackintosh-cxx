@@ -33,6 +33,7 @@
 #ifndef MD5_HPP
 #define MD5_HPP
 
+#include <cstdint>
 #include <string>
 
 // a small class for calculating MD5 hashes of strings or byte arrays
@@ -46,6 +47,7 @@
 
 static_assert(sizeof(char) == sizeof(uint8_t), "char isn't 8 bits");
 static_assert(sizeof(int) == sizeof(uint32_t), "int isn't 32 bits");
+typedef __uint128_t uint128_t;
 
 class MD5 {
 public:
@@ -56,8 +58,7 @@ public:
     void update(const unsigned char* buf, size_type length);
     void update(const char* buf, size_type length);
     MD5& finalize();
-    unsigned char* getDigest();
-    std::string hexDigest() const;
+    uint128_t getDigest();
 
 private:
     const static int blocksize = 64;
@@ -70,7 +71,7 @@ private:
     uint8_t m_buffer[blocksize]; // bytes that didn't fit in last 64 byte chunk
     uint32_t m_count[2]; // 64bit counter for number of bits (lo, hi)
     uint32_t m_state[4]; // digest so far
-    uint8_t m_digest[16]; // the result
+    uint128_t m_digest; // the result
 
     // low level logic operations
     static inline uint32_t F(uint32_t x, uint32_t y, uint32_t z);
@@ -107,8 +108,6 @@ private:
                           uint32_t s,
                           uint32_t ac);
 };
-
-std::string md5(const std::string str);
 
 #endif // MD5_HPP
 

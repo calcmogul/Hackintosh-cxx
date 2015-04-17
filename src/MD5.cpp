@@ -310,7 +310,7 @@ MD5& MD5::finalize() {
         update(bits, 8);
 
         // Store state in digest
-        encode(m_digest, m_state, 16);
+        encode((uint8_t*)&m_digest, m_state, 16);
 
         // Zeroize sensitive information.
         memset(m_buffer, 0, sizeof m_buffer);
@@ -323,28 +323,6 @@ MD5& MD5::finalize() {
 }
 
 // return m_digest
-unsigned char* MD5::getDigest() {
+uint128_t MD5::getDigest() {
     return m_digest;
 }
-
-// return hex representation of m_digest as string
-std::string MD5::hexDigest() const {
-    if (!m_finalized) {
-        return "";
-    }
-
-    char buf[33];
-    for (int i = 0; i < 16; i++) {
-        sprintf(buf + i * 2, "%02x", m_digest[i]);
-    }
-    buf[32] = 0;
-
-    return buf;
-}
-
-std::string md5(const std::string str) {
-    MD5 md5 = MD5(str);
-
-    return md5.hexDigest();
-}
-
