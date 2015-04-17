@@ -22,13 +22,13 @@ std::vector<std::string> words;
  * ([97..122] in ASCII)
  */
 
-uint8_t hash[16];
+uint128_t hash;
 
 // Return value of true means a password matched
 bool sendPassword(std::string pass) {
     MD5 md5 = MD5(pass);
 
-    if (md5.getDigest() == *reinterpret_cast<uint128_t*>(hash)) {
+    if (md5.getDigest() == hash) {
         return true;
     }
     else {
@@ -51,15 +51,15 @@ unsigned int cvtSearchSpacePosToASCII(unsigned int pos) {
 }
 
 // Takes ASCII character as argument
-char incSearchSpaceSlot(char pos) {
+void incSearchSpaceSlot(char& pos) {
     // If at end of numbers 0-9 in ASCII
     if (pos == '9') {
         // Skip to 'a'
-        return 'a';
+        pos = 'a';
     }
     else {
         // Increment normally
-        return pos + 1;
+        pos++;
     }
 }
 
@@ -153,7 +153,7 @@ void runBruteforce(char beginChar, char endChar) {
 
             unsigned int lsb = password.length() - 1;
 
-            password[lsb] = incSearchSpaceSlot(password[lsb]);
+            incSearchSpaceSlot(password[lsb]);
 
             // If overflow in LSB occurred
             if (password[lsb] == 'z' + 1) {
@@ -171,7 +171,7 @@ void runBruteforce(char beginChar, char endChar) {
                      */
                     if (carry > 0) {
                         carry--;
-                        password[carry] = incSearchSpaceSlot(password[carry]);
+                        incSearchSpaceSlot(password[carry]);
                     }
                     else {
                         overflow = true;
@@ -322,8 +322,9 @@ int main(int argc, char* argv[]) {
     // std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
     // std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
     std::string hashStr = "97d3b89397f99594a4981fc6b0cb31b0";
+    uint8_t* temp = reinterpret_cast<uint8_t*>(&hash);
     for (unsigned int i = 0; i < 16; i++) {
-        hash[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
+        temp[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
     }
 
     std::vector<std::future<void>> threads;
