@@ -5,7 +5,6 @@
 #include <chrono>
 #include <thread>
 #include <future>
-#include <atomic>
 #include <cmath>
 
 #include "MD5.hpp"
@@ -14,7 +13,6 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 
 const int gMaxLength = 16;
-std::atomic<char> passwordsFound{0};
 
 std::vector<std::string> words;
 
@@ -125,13 +123,8 @@ void runBruteforce(char beginChar, char endChar) {
                 break;
             }
 
-            if (passwordsFound == 4) {
-                return;
-            }
-
             if (md5.getDigest() == hash) {
                 std::cout << password << " is a password" << std::endl;
-                passwordsFound++;
 
                 // Save password
                 passwords << password;
@@ -250,16 +243,11 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
         numSuffix = std::to_string(currentNum);
 
         for (unsigned int i = dictBegin; i <= dictEnd; i++) {
-            if (passwordsFound == 4) {
-                return;
-            }
-
             if (currentNum != -1) {
                 MD5 md5 = MD5(words[i] + numSuffix);
                 if (md5.getDigest() == hash) {
                     std::cout << words[i] + numSuffix << " is a password" <<
                         std::endl;
-                    passwordsFound++;
 
                     // Save password
                     passwords << words[i] + numSuffix;
@@ -270,7 +258,6 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                 MD5 md5 = MD5(words[i]);
                 if (md5.getDigest() == hash) {
                     std::cout << words[i] << " is a password" << std::endl;
-                    passwordsFound++;
 
                     // Save password
                     passwords << words[i];
