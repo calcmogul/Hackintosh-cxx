@@ -114,8 +114,6 @@ void runBruteforce(char beginChar, char endChar) {
      */
     uint128_t endHash = 0;
 
-    std::cout << "Started computation" << std::endl;
-
     while (password.length() <= gMaxLength) {
         bool overflow = false;
         while (!overflow) {
