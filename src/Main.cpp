@@ -53,7 +53,10 @@ void incSearchSpaceSlot(char& pos) {
 /* 'beginChar' determines where to start brute-force attack in search space.
  * 'endChar' determines where to stop.
  */
-void runBruteforce(char beginChar, char endChar) {
+void runBruteforce(unsigned int beginPos, unsigned int endPos) {
+    char beginChar = cvtSearchSpacePosToASCII(beginPos);
+    char endChar = cvtSearchSpacePosToASCII(endPos);
+
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
     time_point<clock> currentTime = clock::now();
@@ -152,7 +155,7 @@ void runBruteforce(char beginChar, char endChar) {
                 /* While there are still overflows occurring by carrying digits
                  * and the whole string hasn't overflowed
                  */
-                while (!overflow && password[pos] == 'z' + 1) {
+                while (password[pos] == 'z' + 1 && !overflow) {
                     /* Carry over the increment to the next place if there is
                      * one
                      */
@@ -333,8 +336,7 @@ int main(int argc, char* argv[]) {
                                              (36.0 / threadCount)) - 1;
 
             threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                            cvtSearchSpacePosToASCII(beginPos),
-                                            cvtSearchSpacePosToASCII(endPos)));
+                                            beginPos, endPos));
         }
         else if (args[0] == "dict") {
             unsigned int beginPos = std::floor(std::stoi(args[i]) *
