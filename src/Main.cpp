@@ -4,6 +4,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <mutex>
 #include <future>
 #include <cmath>
 
@@ -133,6 +134,9 @@ void runBruteforce(char beginChar, char endChar) {
 
             currentTime = clock::now();
             if (currentTime - lastTime > 1min) {
+                static std::mutex checkptMutex;
+                std::lock_guard<std::mutex> lock(checkptMutex);
+
                 std::cout << "checkpoint: " << password << std::endl;
                 save << password << '\n';
                 save.flush();
@@ -267,6 +271,9 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
 
             currentTime = clock::now();
             if (currentTime - lastTime > 1min) {
+                static std::mutex checkptMutex;
+                std::lock_guard<std::mutex> lock(checkptMutex);
+
                 std::cout << "checkpoint: " << numSuffix << std::endl;
                 save << numSuffix << '\n';
                 save.flush();
