@@ -144,27 +144,26 @@ void runBruteforce(char beginChar, char endChar) {
                 lastTime = currentTime;
             }
 
-            unsigned int lsb = password.length() - 1;
+            unsigned int pos = password.length() - 1;
 
-            incSearchSpaceSlot(password[lsb]);
+            incSearchSpaceSlot(password[pos]);
 
             // If overflow in LSB occurred
-            if (password[lsb] == 'z' + 1) {
+            if (password[pos] == 'z' + 1) {
                 // Initiate carry of digit
-                int carry = lsb;
                 /* While there are still overflows occurring by carrying digits
                  * and the whole string hasn't overflowed
                  */
-                while (!overflow && password[carry] == 'z' + 1) {
-                    // Set current character to '0'
-                    password[carry] = '0';
-
+                while (!overflow && password[pos] == 'z' + 1) {
                     /* Carry over the increment to the next place if there is
                      * one
                      */
-                    if (carry > 0) {
-                        carry--;
-                        incSearchSpaceSlot(password[carry]);
+                    if (pos > 0) {
+                        // Set current character to '0'
+                        password[pos] = '0';
+
+                        pos--;
+                        incSearchSpaceSlot(password[pos]);
                     }
                     else {
                         overflow = true;
