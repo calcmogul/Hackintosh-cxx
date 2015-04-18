@@ -139,7 +139,8 @@ MD5::MD5(const std::string& text) : MD5() {
 // decodes input (unsigned char) into output (uint32_t). Assumes len is a multiple of 4.
 void MD5::decode(uint32_t output[], const uint8_t input[], size_type len) {
     for (unsigned int i = 0, j = 0; j < len; i++, j += 4) {
-        output[i] = ((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
+        output[i] = ((uint32_t) input[j]) |
+                    (((uint32_t) input[j + 1]) << 8) |
                     (((uint32_t) input[j + 2]) << 16) |
                     (((uint32_t) input[j + 3]) << 24);
     }
@@ -289,7 +290,7 @@ void MD5::update(const char input[], size_type length) {
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the message
  * digest and zeroizing the context.
  */
-MD5& MD5::finalize() {
+void MD5::finalize() {
     static unsigned char padding[64] = {
         0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -318,8 +319,6 @@ MD5& MD5::finalize() {
 
         m_finalized = true;
     }
-
-    return *this;
 }
 
 // return digest

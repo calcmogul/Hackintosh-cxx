@@ -57,7 +57,7 @@ public:
     MD5(const std::string& text);
     void update(const unsigned char* buf, size_type length);
     void update(const char* buf, size_type length);
-    MD5& finalize();
+    void finalize();
     uint128_t getDigest();
 
 private:
