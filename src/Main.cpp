@@ -293,17 +293,19 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    std::ifstream dict("dictionary.txt");
-    if (dict.is_open()) {
-        std::string buffer;
-        words.reserve(349900);
-        while (std::getline(dict, buffer)) {
-            words.push_back(buffer);
+    if (args[0] == "dict") {
+        std::ifstream dict("dictionary.txt");
+        if (dict.is_open()) {
+            std::string buffer;
+            words.reserve(349900);
+            while (std::getline(dict, buffer)) {
+                words.push_back(buffer);
+            }
         }
-    }
-    else {
-        std::cout << "Failed to open dictionary." << std::endl;
-        return 0;
+        else {
+            std::cout << "Failed to open dictionary." << std::endl;
+            return 0;
+        }
     }
 
     // std::string hashStr = "a7a189951821c2ebf7bf3167ec3f9fbe";
