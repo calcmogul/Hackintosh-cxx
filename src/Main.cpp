@@ -125,9 +125,6 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
         bool overflow = false;
         while (!overflow) {
             MD5 md5 = MD5(password);
-            if (md5.getDigest() == endHash) {
-                break;
-            }
 
             if (md5.getDigest() == hash) {
                 std::cout << password << " is a password" << std::endl;
@@ -135,6 +132,10 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
                 // Save password
                 passwords << password;
                 passwords.flush();
+            }
+
+            if (md5.getDigest() == endHash) {
+                break;
             }
 
             currentTime = clock::now();
