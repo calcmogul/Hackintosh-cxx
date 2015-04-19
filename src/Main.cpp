@@ -109,13 +109,17 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
         exit(1);
     }
 
-    std::string endPassword(password.length(), endChar);
+    std::string endPassword(1, endChar);
+    for (unsigned int i = 1; i < password.length(); i++) {
+        endPassword += 'z';
+    }
 
     /* Used by thread to determine when searching a segment has been completed.
      * If password starts at 'd', 'd0', 'd00', etc. then endHash should contain
      * 'd', 'dz', 'dzz', etc.
      */
-    uint128_t endHash = 0;
+    MD5 md5 = MD5(endPassword);
+    uint128_t endHash = md5.getDigest();
 
     while (password.length() <= gMaxLength) {
         bool overflow = false;
