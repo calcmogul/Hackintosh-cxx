@@ -82,7 +82,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
         }
         save.clear();
 
-        if (checkpoint.size() > 0) {
+        if (checkpoint.length() > 0) {
             std::cout << "Restored from latest password: " << checkpoint <<
                 std::endl;
             password = checkpoint;
@@ -223,7 +223,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
         }
         save.clear();
 
-        if (checkpoint.size() > 0) {
+        if (checkpoint.length() > 0) {
             std::cout << "Restored from latest password: " << checkpoint <<
                 std::endl;
             numSuffix = checkpoint;
