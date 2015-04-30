@@ -56,12 +56,11 @@ void incSearchSpaceSlot(char& pos) {
 void runBruteforce(unsigned int beginPos, unsigned int endPos) {
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
     char endChar = cvtSearchSpacePosToASCII(endPos);
+    unsigned int checkptCount = 0;
 
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
-    time_point<clock> currentTime = clock::now();
-    time_point<clock> lastTime = currentTime;
-    time_point<clock> startTime = currentTime;
+    time_point<clock> startTime = clock::now();
 
     std::string password;
     password.reserve(gMaxLength);
@@ -138,8 +137,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
                 break;
             }
 
-            currentTime = clock::now();
-            if (currentTime - lastTime > 1min) {
+            if (checkptCount == 300000000) {
                 static std::mutex checkptMutex;
                 std::lock_guard<std::mutex> lock(checkptMutex);
 
@@ -147,7 +145,10 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
                 save << password << '\n';
                 save.flush();
 
-                lastTime = currentTime;
+                checkptCount = 0;
+            }
+            else {
+                checkptCount++;
             }
 
             unsigned int pos = password.length() - 1;
@@ -192,7 +193,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
     }
 
     std::cout << "elapsed: "
-              << duration_cast<milliseconds>(currentTime - startTime).count() /
+              << duration_cast<milliseconds>(clock::now() - startTime).count() /
         1000.f
               << "s"
               << std::endl;
