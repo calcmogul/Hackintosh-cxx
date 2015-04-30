@@ -74,39 +74,39 @@ private:
     bool m_finalized;
 
     // low level logic operations
-    static inline uint32_t F(uint32_t x, uint32_t y, uint32_t z);
-    static inline uint32_t G(uint32_t x, uint32_t y, uint32_t z);
-    static inline uint32_t H(uint32_t x, uint32_t y, uint32_t z);
-    static inline uint32_t I(uint32_t x, uint32_t y, uint32_t z);
-    static inline uint32_t rotate_left(uint32_t x, int n);
-    static inline void FF(uint32_t& a,
-                          uint32_t b,
-                          uint32_t c,
-                          uint32_t d,
-                          uint32_t x,
-                          uint32_t s,
-                          uint32_t ac);
-    static inline void GG(uint32_t& a,
-                          uint32_t b,
-                          uint32_t c,
-                          uint32_t d,
-                          uint32_t x,
-                          uint32_t s,
-                          uint32_t ac);
-    static inline void HH(uint32_t& a,
-                          uint32_t b,
-                          uint32_t c,
-                          uint32_t d,
-                          uint32_t x,
-                          uint32_t s,
-                          uint32_t ac);
-    static inline void II(uint32_t& a,
-                          uint32_t b,
-                          uint32_t c,
-                          uint32_t d,
-                          uint32_t x,
-                          uint32_t s,
-                          uint32_t ac);
+    static uint32_t F(uint32_t x, uint32_t y, uint32_t z);
+    static uint32_t G(uint32_t x, uint32_t y, uint32_t z);
+    static uint32_t H(uint32_t x, uint32_t y, uint32_t z);
+    static uint32_t I(uint32_t x, uint32_t y, uint32_t z);
+    static uint32_t rotate_left(uint32_t x, int n);
+    static void FF(uint32_t& a,
+                   uint32_t b,
+                   uint32_t c,
+                   uint32_t d,
+                   uint32_t x,
+                   uint32_t s,
+                   uint32_t ac);
+    static void GG(uint32_t& a,
+                   uint32_t b,
+                   uint32_t c,
+                   uint32_t d,
+                   uint32_t x,
+                   uint32_t s,
+                   uint32_t ac);
+    static void HH(uint32_t& a,
+                   uint32_t b,
+                   uint32_t c,
+                   uint32_t d,
+                   uint32_t x,
+                   uint32_t s,
+                   uint32_t ac);
+    static void II(uint32_t& a,
+                   uint32_t b,
+                   uint32_t c,
+                   uint32_t d,
+                   uint32_t x,
+                   uint32_t s,
+                   uint32_t ac);
 };
 
 #endif // MD5_HPP
