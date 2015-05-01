@@ -155,22 +155,16 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
 
             incSearchSpaceSlot(password[pos]);
 
-            // If overflow in LSB occurred
-            if (password[pos] == 'z' + 1) {
-                // Initiate carry of digit
-                /* While there are still overflows occurring by carrying digits
-                 * and the whole string hasn't overflowed
-                 */
-                while (password[pos] == 'z' + 1 && pos > 0) {
-                    // Set current character to '0'
-                    password[pos] = '0';
+            /* While there are overflows occurring by carrying digits and the
+             * whole string hasn't overflowed
+             */
+            while (password[pos] == 'z' + 1 && pos > 0) {
+                // Set current character to '0'
+                password[pos] = '0';
 
-                    /* Carry over the increment to the next place if there is
-                     * one
-                     */
-                    pos--;
-                    incSearchSpaceSlot(password[pos]);
-                }
+                // Carry over the increment to the next place if there is one
+                pos--;
+                incSearchSpaceSlot(password[pos]);
 
                 if (pos == 0) {
                     overflow = true;

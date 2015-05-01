@@ -55,10 +55,28 @@ MD5 class methods' inline keyword has been removed so compiler can decide it:
     43.99s
     43.375s
 
-Overflow loop now checks "pos", an unsigned integer, instead of bool:
+Overflow loop now checks "pos", an unsigned integer, instead of bool and removed some branching:
 
     11.027s
     10.968s
+
+With if statement around overflow while loop:
+
+    11.016s
+    11.025s
+    11.027s
+    11.041s
+    11.102s
+    11.042s
+
+Without if statement around overflow while loop:
+
+    10.969s
+    10.976s
+    10.974s
+    10.988s
+    10.97s
+    10.971s
 
 # Dictionary
 This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict 0".
