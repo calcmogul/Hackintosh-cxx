@@ -298,11 +298,13 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
 
 int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
+    unsigned int threadCount = 20;
 
     if (args.size() < 2) {
         std::cout << "usage: Hackintosh-cxx (brute|dict) <WU> [<WU>...]\n"
-                     "There are 10 possible work units (0..9 inclusive). Pass"
-                     "a space delimited list of the ones to run." << std::endl;
+                     "There are " << threadCount << " possible work units "
+                  << "(0.." << threadCount - 1 << " inclusive). Pass a space"
+                     "delimited list of the ones to run." << std::endl;
         return 0;
     }
 
@@ -331,7 +333,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<std::future<void>> threads;
-    unsigned int threadCount = 10;
 
     // Spawn worker threads
     for (unsigned int i = 1; i < args.size(); i++) {
