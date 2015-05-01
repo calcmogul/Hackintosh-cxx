@@ -153,22 +153,33 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
 
             unsigned int pos = password.length() - 1;
 
+            // Increment right-most character
             incSearchSpaceSlot(password[pos]);
 
             /* While there are overflows occurring by carrying digits and the
-             * whole string hasn't overflowed
+             * whole string hasn't overflowed.
+             *
+             * The contents of this while loop would crash at
+             * "incSearchSpaceSlot(password[pos]);" if "password" were a
+             * one-character string, but comparing against endPassword is
+             * sufficient to terminate the "while (!overflow)" loop before that
+             * can happen.
              */
-            while (password[pos] == 'z' + 1 && pos > 0) {
-                // Set current character to '0'
-                password[pos] = '0';
-
-                // Carry over the increment to the next place if there is one
-                pos--;
-                incSearchSpaceSlot(password[pos]);
-
+            while (password[pos] == 'z' + 1) {
+                /* Carries are occurring. If there is no place to which to
+                 * carry, an overflow occurred.
+                 */
                 if (pos == 0) {
                     overflow = true;
+                    break;
                 }
+
+                // Reset current character to '0'.
+                password[pos] = '0';
+
+                // Carry over the increment to the next place
+                pos--;
+                incSearchSpaceSlot(password[pos]);
             }
         }
 

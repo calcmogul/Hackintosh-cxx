@@ -5,6 +5,8 @@ The time I use for these benchmarks is the one printed out when the program exit
 ## Brute Force
 This benchmark checks all lower alphanumeric strings of length 6 or less. It is run with "Hackintosh-cxx brute 0".
 
+Initially, it was done in 0-3 range.
+
 Various changes applied before each test, most of which were optimizations:
 
     55.427s
@@ -62,6 +64,8 @@ Overflow loop now checks "pos", an unsigned integer, instead of bool and removed
     11.027s
     10.968s
 
+Changed to 0-1 range for benchmarking after this.
+
 With if statement around overflow while loop:
 
     11.016s
@@ -79,6 +83,22 @@ Without if statement around overflow while loop:
     10.988s
     10.97s
     10.971s
+
+After fixing corner case for passwords of length 1:
+
+    10.951s
+    10.949s
+    10.973s
+
+After fixing overflow triggering prematurely:
+
+    21.882s
+    21.933s
+    21.912s
+
+Changed back to 0-3 range for consistency with previous data:
+
+    43.728s
 
 # Dictionary
 This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict 0".
