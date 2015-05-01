@@ -187,7 +187,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
 
         // Set all characters in string to start of this thread's partition
         password[0] = beginChar;
-        for (unsigned int i = 1; i < password.length(); i++) {
+        for (unsigned int i = 1; i < password.length() - 1; i++) {
             password[i] = '0';
         }
     }
