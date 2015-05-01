@@ -202,9 +202,8 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
 void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
-    time_point<clock> currentTime = clock::now();
-    time_point<clock> lastTime = currentTime;
-    time_point<clock> startTime = currentTime;
+    time_point<clock> startTime = clock::now();
+    unsigned int checkptCount = 0;
 
     std::string numSuffix = "-1";
 
@@ -275,8 +274,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                 }
             }
 
-            currentTime = clock::now();
-            if (currentTime - lastTime > 1min) {
+            if (checkptCount == 1000000) {
                 static std::mutex checkptMutex;
                 std::lock_guard<std::mutex> lock(checkptMutex);
 
@@ -284,13 +282,16 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
                 save << numSuffix << '\n';
                 save.flush();
 
-                lastTime = currentTime;
+                checkptCount = 0;
+            }
+            else {
+                checkptCount++;
             }
         }
     }
 
     std::cout << "elapsed: "
-              << duration_cast<milliseconds>(currentTime - startTime).count() /
+              << duration_cast<milliseconds>(clock::now() - startTime).count() /
         1000.f
               << "s"
               << std::endl;
