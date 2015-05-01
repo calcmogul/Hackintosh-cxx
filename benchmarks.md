@@ -1,5 +1,7 @@
 # Benchmarks
 
+The time I use for these benchmarks is the one printed out when the program exits.
+
 ## Brute Force
 This benchmark checks all lower alphanumeric strings of length 6 or less. It is run with "Hackintosh-cxx brute 0".
 
