@@ -58,10 +58,6 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
     char endChar = cvtSearchSpacePosToASCII(endPos);
     unsigned int checkptCount = 0;
 
-    // Prepare timing for checkpoints
-    using clock = std::chrono::system_clock;
-    time_point<clock> startTime = clock::now();
-
     std::string password;
     password.reserve(gMaxLength);
     password += beginChar;
@@ -119,6 +115,10 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
      */
     MD5 md5 = MD5(endPassword);
     uint128_t endHash = md5.getDigest();
+
+    // Prepare timing for checkpoints
+    using clock = std::chrono::system_clock;
+    time_point<clock> startTime = clock::now();
 
     while (password.length() <= gMaxLength) {
         bool overflow = false;
@@ -204,9 +204,6 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
 }
 
 void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
-    // Prepare timing for checkpoints
-    using clock = std::chrono::system_clock;
-    time_point<clock> startTime = clock::now();
     unsigned int checkptCount = 0;
 
     std::string numSuffix = "-1";
@@ -250,6 +247,10 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
             std::endl;
         exit(1);
     }
+
+    // Prepare timing for checkpoints
+    using clock = std::chrono::system_clock;
+    time_point<clock> startTime = clock::now();
 
     for (int currentNum = std::stoi(numSuffix); currentNum <= 1000;
          currentNum++) {

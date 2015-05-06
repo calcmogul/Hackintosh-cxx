@@ -98,7 +98,18 @@ After fixing overflow triggering prematurely:
 
 Changed back to 0-3 range for consistency with previous data:
 
-    43.728s
+    43.606s
+    43.559s
+    43.517s
+    43.539s
+    43.569s
+    43.644s
+    43.688s
+
+Moved startTime up to outer while loop to avoid including file I/O in timing:
+
+    43.572s
+    43.662s
 
 # Dictionary
 This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict 0".
