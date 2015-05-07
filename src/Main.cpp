@@ -13,8 +13,6 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-const int gMaxLength = 16;
-
 std::vector<std::string> words;
 
 /* Try each number ([48..57] in ASCII) and lower case letter
@@ -53,13 +51,13 @@ void incSearchSpaceSlot(char& pos) {
 /* 'beginChar' determines where to start brute-force attack in search space.
  * 'endChar' determines where to stop.
  */
-void runBruteforce(unsigned int beginPos, unsigned int endPos) {
+void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
     char endChar = cvtSearchSpacePosToASCII(endPos);
     unsigned int checkptCount = 0;
 
     std::string password;
-    password.reserve(gMaxLength);
+    password.reserve(maximum);
     password += beginChar;
 
     std::string nameStub(1, beginChar);
@@ -120,7 +118,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
-    while (password.length() <= gMaxLength) {
+    while (password.length() <= (unsigned int) maximum) {
         bool overflow = false;
         while (!overflow) {
             MD5 md5 = MD5(password);
@@ -203,7 +201,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos) {
               << std::endl;
 }
 
-void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
+void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     unsigned int checkptCount = 0;
 
     std::string numSuffix = "-1";
@@ -252,7 +250,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd) {
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
-    for (int currentNum = std::stoi(numSuffix); currentNum <= 1000;
+    for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
          currentNum++) {
         numSuffix = std::to_string(currentNum);
 
@@ -306,12 +304,14 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
     unsigned int threadCount = 20;
 
-    if (args.size() < 2) {
+    if (!((args.size() == 1 && args[0] == "benchmark") ||
+            (args.size() >= 2 && (args[0] == "brute" || args[0] == "dict")))) {
         std::cout << "usage: Hackintosh-cxx (brute|dict) <WU> [<WU>...]\n"
+                     "       Hackintosh-cxx benchmark\n"
                      "There are " << threadCount << " possible work units "
                   << "(0.." << threadCount - 1 << " inclusive). Pass a space"
                                         "delimited list of the ones to run." <<
-        std::endl;
+            std::endl;
         return 0;
     }
 
@@ -341,25 +341,33 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::future<void>> threads;
 
-    // Spawn worker threads
-    for (unsigned int i = 1; i < args.size(); i++) {
-        if (args[0] == "brute") {
-            unsigned int beginPos = std::round(std::stoi(args[i]) *
-                                               (36.0 / threadCount));
-            unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
-                                             (36.0 / threadCount)) - 1;
+    if (args[0] == "benchmark") {
+        threads.emplace_back(std::async(std::launch::async, runBruteforce,
+                                        0, 3, 6));
+    }
+    else {
+        // Spawn worker threads
+        for (unsigned int i = 1; i < args.size(); i++) {
+            if (args[0] == "brute") {
+                unsigned int beginPos = std::round(std::stoi(args[i]) *
+                                                   (36.0 / threadCount));
+                unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
+                                                 (36.0 / threadCount)) - 1;
 
-            threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                            beginPos, endPos));
-        }
-        else if (args[0] == "dict") {
-            unsigned int beginPos = std::floor(std::stoi(args[i]) *
-                                               (349900.0 / threadCount));
-            unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
-                                            (349900.0 / threadCount)) - 1;
+                threads.emplace_back(std::async(std::launch::async,
+                                                runBruteforce, beginPos, endPos,
+                                                16));
+            }
+            else if (args[0] == "dict") {
+                unsigned int beginPos = std::floor(std::stoi(args[i]) *
+                                                   (349900.0 / threadCount));
+                unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
+                                                (349900.0 / threadCount)) - 1;
 
-            threads.emplace_back(std::async(std::launch::async, runDictionary,
-                                            beginPos, endPos));
+                threads.emplace_back(std::async(std::launch::async,
+                                                runDictionary, beginPos, endPos,
+                                                1000));
+            }
         }
     }
 
