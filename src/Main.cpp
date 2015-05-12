@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <future>
+#include <algorithm>
 #include <cmath>
 
 #include "MD5.hpp"
@@ -277,7 +278,115 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
                 }
             }
 
-            if (checkptCount == 1000000) {
+            if (checkptCount == 30000000) {
+                static std::mutex checkptMutex;
+                std::lock_guard<std::mutex> lock(checkptMutex);
+
+                std::cout << "checkpoint: " << numSuffix << std::endl;
+                save << numSuffix << '\n';
+                save.flush();
+
+                checkptCount = 0;
+            }
+            else {
+                checkptCount++;
+            }
+        }
+    }
+
+    std::cout << "elapsed: "
+              << duration_cast<milliseconds>(clock::now() - startTime).count() /
+        1000.f
+              << "s"
+              << std::endl;
+}
+
+// 'pos' is current position in sorted dictionary
+void buildPassword(std::string& password, unsigned int pos) {
+}
+
+void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
+    unsigned int checkptCount = 0;
+
+    std::string numSuffix = "-1";
+
+    std::string nameStub = "dict-";
+    nameStub += std::to_string(dictBegin);
+    nameStub += '-';
+    nameStub += std::to_string(dictEnd);
+
+    // Load last checkpoint
+    std::fstream save(nameStub + ".txt", std::fstream::in);
+    if (save.is_open()) {
+        std::string buffer;
+        std::string checkpoint;
+
+        while (std::getline(save, buffer)) {
+            checkpoint = buffer;
+        }
+        save.clear();
+
+        if (checkpoint.length() > 0) {
+            std::cout << "Restored from latest password: " << checkpoint <<
+                std::endl;
+            numSuffix = checkpoint;
+        }
+
+        save.close();
+    }
+    else {
+        std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
+    }
+
+    // Reopen checkpoint file for writing
+    save.open(nameStub + ".txt", std::fstream::out | std::fstream::app);
+
+    // Open password output file
+    std::ofstream passwords(nameStub + "-passwds.txt",
+                            std::fstream::out | std::ofstream::app);
+    if (!passwords.is_open()) {
+        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
+            std::endl;
+        exit(1);
+    }
+
+    // Prepare timing for checkpoints
+    using clock = std::chrono::system_clock;
+    time_point<clock> startTime = clock::now();
+
+    std::string password;
+    for (unsigned int i = dictBegin; i <= dictEnd; i++) {
+        // password =
+    }
+
+    for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
+         currentNum++) {
+        numSuffix = std::to_string(currentNum);
+
+        for (unsigned int i = dictBegin; i <= dictEnd; i++) {
+            if (currentNum != -1) {
+                MD5 md5 = MD5(words[i] + numSuffix);
+                if (md5.getDigest() == hash) {
+                    std::cout << words[i] + numSuffix << " is a password" <<
+                        std::endl;
+
+                    // Save password
+                    passwords << words[i] + numSuffix;
+                    passwords.flush();
+                }
+            }
+            else {
+                MD5 md5 = MD5(words[i]);
+                if (md5.getDigest() == hash) {
+                    std::cout << words[i] << " is a password" << std::endl;
+
+                    // Save password
+                    passwords << words[i];
+                    passwords.flush();
+                }
+            }
+
+            if (checkptCount == 300000000) {
                 static std::mutex checkptMutex;
                 std::lock_guard<std::mutex> lock(checkptMutex);
 
@@ -305,7 +414,8 @@ int main(int argc, char* argv[]) {
     unsigned int threadCount = 20;
 
     if (!((args.size() == 1 && args[0] == "benchmark") ||
-            (args.size() >= 2 && (args[0] == "brute" || args[0] == "dict")))) {
+          (args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
+                                args[0] == "combo")))) {
         std::cout << "usage: Hackintosh-cxx (brute|dict) <WU> [<WU>...]\n"
                      "       Hackintosh-cxx benchmark\n"
                      "There are " << threadCount << " possible work units "
@@ -323,6 +433,26 @@ int main(int argc, char* argv[]) {
             while (std::getline(dict, buffer)) {
                 words.push_back(buffer);
             }
+        }
+        else {
+            std::cout << "Failed to open dictionary." << std::endl;
+            return 0;
+        }
+    }
+    else if (args[0] == "combo") {
+        std::ifstream dict("dictionary.txt");
+        if (dict.is_open()) {
+            std::string buffer;
+            words.reserve(349900);
+            while (std::getline(dict, buffer)) {
+                if (buffer.length() <= 10) {
+                    words.push_back(buffer);
+                }
+            }
+
+            std::sort(words.begin(), words.end(), [] (auto& i, auto& j) {
+                return i.length() < j.length();
+            });
         }
         else {
             std::cout << "Failed to open dictionary." << std::endl;
@@ -360,13 +490,29 @@ int main(int argc, char* argv[]) {
             }
             else if (args[0] == "dict") {
                 unsigned int beginPos = std::floor(std::stoi(args[i]) *
-                                                   (349900.0 / threadCount));
+                                                   (static_cast<float>(words.
+                                                                       size()) /
+                                                    threadCount));
                 unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
-                                                (349900.0 / threadCount)) - 1;
+                                                (static_cast<float>(words.size())
+                                                 / threadCount)) - 1;
 
                 threads.emplace_back(std::async(std::launch::async,
                                                 runDictionary, beginPos, endPos,
-                                                1000));
+                                                999999999));
+            }
+            else if (args[0] == "combo") {
+                unsigned int beginPos = std::floor(std::stoi(args[i]) *
+                                                   (static_cast<float>(words.
+                                                                       size()) /
+                                                    threadCount));
+                unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
+                                                (static_cast<float>(words.size())
+                                                 / threadCount)) - 1;
+
+                threads.emplace_back(std::async(std::launch::async,
+                                                runCombo, beginPos, endPos,
+                                                100000000));
             }
         }
     }
