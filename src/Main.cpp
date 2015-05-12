@@ -301,10 +301,6 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
               << std::endl;
 }
 
-// 'pos' is current position in sorted dictionary
-void buildPassword(std::string& password, unsigned int pos) {
-}
-
 void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     unsigned int checkptCount = 0;
 
@@ -388,7 +384,7 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
                     std::lock_guard<std::mutex> lock(checkptMutex);
 
                     std::cout << "checkpoint: " << words[i] << std::endl;
-                    save << words[i] << '\n';
+                    save << i << '\n';
                     save.flush();
 
                     checkptCount = 0;
