@@ -304,8 +304,6 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
 void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     unsigned int checkptCount = 0;
 
-    std::string numSuffix = "-1";
-
     std::string nameStub = "combo-";
     nameStub += std::to_string(dictBegin);
     nameStub += '-';
@@ -351,21 +349,59 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
+    std::string numStr;
     for (unsigned int i = dictBegin; i <= dictEnd; i++) {
         for (unsigned int j = 0; j < words.size(); j++) {
-            for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
-                 currentNum++) {
-                numSuffix = std::to_string(currentNum);
-
-                if (currentNum != -1) {
-                    MD5 md5 = MD5(words[i] + words[j] + numSuffix);
+            numStr.clear();
+            while (numStr.length() <= 3) {
+                if (numStr.length() != 0) {
+                    MD5 md5 = MD5(words[i] + words[j] + numStr);
                     if (md5.getDigest() == hash) {
-                        std::cout << words[i] + words[j] + numSuffix
+                        std::cout << words[i] + words[j] + numStr
                                   << " is a password" << std::endl;
 
                         // Save password
-                        passwords << words[i] + words[j] + numSuffix;
+                        passwords << words[i] + words[j] + numStr;
                         passwords.flush();
+                    }
+
+                    unsigned int pos = numStr.length() - 1;
+
+                    // Increment right-most character
+                    numStr[pos]++;
+
+                    /* While there are overflows occurring by carrying digits and the
+                     * whole string hasn't overflowed.
+                     *
+                     * The contents of this while loop would crash at
+                     * "incSearchSpaceSlot(password[pos]);" if "password" were a
+                     * one-character string, but comparing against endPassword is
+                     * sufficient to terminate the "while (!overflow)" loop before that
+                     * can happen.
+                     */
+                    while (numStr[pos] == '9' + 1) {
+                        /* Carries are occurring. If there is no place to which to
+                         * carry, an overflow occurred.
+                         */
+                        if (pos == 0) {
+                            // Increase string size, then reset string
+                            numStr += '0';
+
+                            // Set all characters in string to start of this thread's partition
+                            for (unsigned int i = 0;
+                                 i < numStr.length() - 1;
+                                 i++) {
+                                numStr[i] = '0';
+                            }
+                            break;
+                        }
+
+                        // Reset current character to '0'.
+                        numStr[pos] = '0';
+
+                        // Carry over the increment to the next place
+                        pos--;
+                        numStr[pos]++;
                     }
                 }
                 else {
@@ -378,6 +414,8 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
                         passwords << words[i] + words[j];
                         passwords.flush();
                     }
+
+                    numStr += '0';
                 }
 
                 if (checkptCount == 60000000) {
@@ -393,6 +431,14 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
                 else {
                     checkptCount++;
                 }
+            }
+
+            // Increase string size, then reset string
+            numStr += '0';
+
+            // Set all characters in string to start of this thread's partition
+            for (unsigned int i = 0; i < numStr.length() - 1; i++) {
+                numStr[i] = '0';
             }
         }
     }
