@@ -442,10 +442,9 @@ int main(int argc, char* argv[]) {
         if (dict.is_open()) {
             std::string buffer;
             words.reserve(349900);
+            words.push_back("");
             while (std::getline(dict, buffer)) {
-                if (buffer.length() <= 10) {
-                    words.push_back(buffer);
-                }
+                words.push_back(buffer);
             }
 
             std::sort(words.begin(), words.end(), [] (auto& i, auto& j) {
