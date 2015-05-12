@@ -323,8 +323,9 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
         save.clear();
 
         if (checkpoint.length() > 0) {
-            std::cout << "Restored from latest password: " << checkpoint <<
-                std::endl;
+            std::cout << "Restored from latest password: "
+                      << words[std::stoi(checkpoint)]
+                      << std::endl;
             dictBegin = std::stoi(checkpoint);
         }
 
