@@ -310,7 +310,7 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
 
     std::string numSuffix = "-1";
 
-    std::string nameStub = "dict-";
+    std::string nameStub = "combo-";
     nameStub += std::to_string(dictBegin);
     nameStub += '-';
     nameStub += std::to_string(dictEnd);
@@ -329,7 +329,7 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
         if (checkpoint.length() > 0) {
             std::cout << "Restored from latest password: " << checkpoint <<
                 std::endl;
-            numSuffix = checkpoint;
+            dictBegin = std::stoi(checkpoint);
         }
 
         save.close();
@@ -354,50 +354,48 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
-    std::string password;
     for (unsigned int i = dictBegin; i <= dictEnd; i++) {
-        // password =
-    }
+        for (unsigned int j = 0; j < words.size(); j++) {
+            for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
+                 currentNum++) {
+                numSuffix = std::to_string(currentNum);
 
-    for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
-         currentNum++) {
-        numSuffix = std::to_string(currentNum);
+                if (currentNum != -1) {
+                    MD5 md5 = MD5(words[i] + words[j] + numSuffix);
+                    if (md5.getDigest() == hash) {
+                        std::cout << words[i] + words[j] + numSuffix
+                                  << " is a password" << std::endl;
 
-        for (unsigned int i = dictBegin; i <= dictEnd; i++) {
-            if (currentNum != -1) {
-                MD5 md5 = MD5(words[i] + numSuffix);
-                if (md5.getDigest() == hash) {
-                    std::cout << words[i] + numSuffix << " is a password" <<
-                        std::endl;
-
-                    // Save password
-                    passwords << words[i] + numSuffix;
-                    passwords.flush();
+                        // Save password
+                        passwords << words[i] + words[j] + numSuffix;
+                        passwords.flush();
+                    }
                 }
-            }
-            else {
-                MD5 md5 = MD5(words[i]);
-                if (md5.getDigest() == hash) {
-                    std::cout << words[i] << " is a password" << std::endl;
+                else {
+                    MD5 md5 = MD5(words[i] + words[j]);
+                    if (md5.getDigest() == hash) {
+                        std::cout << words[i] + words[j]
+                                  << " is a password" << std::endl;
 
-                    // Save password
-                    passwords << words[i];
-                    passwords.flush();
+                        // Save password
+                        passwords << words[i] + words[j];
+                        passwords.flush();
+                    }
                 }
-            }
 
-            if (checkptCount == 300000000) {
-                static std::mutex checkptMutex;
-                std::lock_guard<std::mutex> lock(checkptMutex);
+                if (checkptCount == 60000000) {
+                    static std::mutex checkptMutex;
+                    std::lock_guard<std::mutex> lock(checkptMutex);
 
-                std::cout << "checkpoint: " << numSuffix << std::endl;
-                save << numSuffix << '\n';
-                save.flush();
+                    std::cout << "checkpoint: " << words[i] << std::endl;
+                    save << words[i] << '\n';
+                    save.flush();
 
-                checkptCount = 0;
-            }
-            else {
-                checkptCount++;
+                    checkptCount = 0;
+                }
+                else {
+                    checkptCount++;
+                }
             }
         }
     }
@@ -416,7 +414,7 @@ int main(int argc, char* argv[]) {
     if (!((args.size() == 1 && args[0] == "benchmark") ||
           (args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
                                 args[0] == "combo")))) {
-        std::cout << "usage: Hackintosh-cxx (brute|dict) <WU> [<WU>...]\n"
+        std::cout << "usage: Hackintosh-cxx (brute|dict|combo) <WU> [<WU>...]\n"
                      "       Hackintosh-cxx benchmark\n"
                      "There are " << threadCount << " possible work units "
                   << "(0.." << threadCount - 1 << " inclusive). Pass a space"
@@ -512,7 +510,7 @@ int main(int argc, char* argv[]) {
 
                 threads.emplace_back(std::async(std::launch::async,
                                                 runCombo, beginPos, endPos,
-                                                100000000));
+                                                1000));
             }
         }
     }
