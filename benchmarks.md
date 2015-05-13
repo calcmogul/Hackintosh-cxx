@@ -1,9 +1,9 @@
 # Benchmarks
 
-The time I use for these benchmarks is the one printed out when the program exits.
+The time I use for these benchmarks is the one printed out when the program exits. These results were obtained with an Intel i5-2430M SandyBridge second generation processor.
 
 ## Brute Force
-This benchmark checks all lower alphanumeric strings of length 6 or less. It is run with "Hackintosh-cxx brute 0".
+This benchmark checks all lower alphanumeric strings of length 6 or less. It is run with "Hackintosh-cxx brute benchmark".
 
 Initially, it was done in 0-3 range.
 
@@ -112,9 +112,16 @@ Moved startTime up to outer while loop to avoid including file I/O in timing:
     43.662s
 
 # Dictionary
-This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict 0".
+This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict benchmark".
 
 Initial:
 
     10.820s
+
+# Combo
+This benchmark combines two words from a dictionary and appends an integer. The benchmark is run with "Hackintosh-cxx combo benchmark".
+
+Initial:
+
+    58.306s
 
