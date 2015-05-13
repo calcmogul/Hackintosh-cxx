@@ -352,9 +352,11 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     std::string numStr;
     for (unsigned int i = dictBegin; i <= dictEnd; i++) {
         for (unsigned int j = 0; j < words.size(); j++) {
-            numStr.clear();
-            while (numStr.length() <= 3) {
-                if (numStr.length() != 0) {
+            // Don't check for possibility that there is no number suffix
+            numStr = "0";
+            while (numStr.length() <= 2) {
+                if (words[i].length() + words[j].length() + numStr.length() >=
+                    9) {
                     MD5 md5 = MD5(words[i] + words[j] + numStr);
                     if (md5.getDigest() == hash) {
                         std::cout << words[i] + words[j] + numStr
@@ -364,58 +366,45 @@ void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
                         passwords << words[i] + words[j] + numStr;
                         passwords.flush();
                     }
-
-                    unsigned int pos = numStr.length() - 1;
-
-                    // Increment right-most character
-                    numStr[pos]++;
-
-                    /* While there are overflows occurring by carrying digits and the
-                     * whole string hasn't overflowed.
-                     *
-                     * The contents of this while loop would crash at
-                     * "incSearchSpaceSlot(password[pos]);" if "password" were a
-                     * one-character string, but comparing against endPassword is
-                     * sufficient to terminate the "while (!overflow)" loop before that
-                     * can happen.
-                     */
-                    while (numStr[pos] == '9' + 1) {
-                        /* Carries are occurring. If there is no place to which to
-                         * carry, an overflow occurred.
-                         */
-                        if (pos == 0) {
-                            // Increase string size, then reset string
-                            numStr += '0';
-
-                            // Set all characters in string to start of this thread's partition
-                            for (unsigned int i = 0;
-                                 i < numStr.length() - 1;
-                                 i++) {
-                                numStr[i] = '0';
-                            }
-                            break;
-                        }
-
-                        // Reset current character to '0'.
-                        numStr[pos] = '0';
-
-                        // Carry over the increment to the next place
-                        pos--;
-                        numStr[pos]++;
-                    }
                 }
-                else {
-                    MD5 md5 = MD5(words[i] + words[j]);
-                    if (md5.getDigest() == hash) {
-                        std::cout << words[i] + words[j]
-                                  << " is a password" << std::endl;
 
-                        // Save password
-                        passwords << words[i] + words[j];
-                        passwords.flush();
+                unsigned int pos = numStr.length() - 1;
+
+                // Increment right-most character
+                numStr[pos]++;
+
+                /* While there are overflows occurring by carrying digits and the
+                 * whole string hasn't overflowed.
+                 *
+                 * The contents of this while loop would crash at
+                 * "incSearchSpaceSlot(password[pos]);" if "password" were a
+                 * one-character string, but comparing against endPassword is
+                 * sufficient to terminate the "while (!overflow)" loop before that
+                 * can happen.
+                 */
+                while (numStr[pos] == '9' + 1) {
+                    /* Carries are occurring. If there is no place to which to
+                     * carry, an overflow occurred.
+                     */
+                    if (pos == 0) {
+                        // Increase string size, then reset string
+                        numStr += '0';
+
+                        // Set all characters in string to start of this thread's partition
+                        for (unsigned int k = 0;
+                             k < numStr.length() - 1;
+                             k++) {
+                            numStr[k] = '0';
+                        }
+                        break;
                     }
 
-                    numStr += '0';
+                    // Reset current character to '0'.
+                    numStr[pos] = '0';
+
+                    // Carry over the increment to the next place
+                    pos--;
+                    numStr[pos]++;
                 }
 
                 if (checkptCount == 60000000) {
@@ -461,7 +450,7 @@ int main(int argc, char* argv[]) {
                      "There are " << threadCount << " possible work units "
                   << "(0.." << threadCount - 1 << " inclusive). Pass a space"
                                         "delimited list of the ones to run." <<
-        std::endl;
+            std::endl;
         return 0;
     }
 
@@ -522,7 +511,7 @@ int main(int argc, char* argv[]) {
         }
         else if (args[0] == "combo") {
             threads.emplace_back(std::async(std::launch::async,
-                                            runCombo, 0, 1, 100));
+                                            runCombo, 0, 3, 100));
         }
     }
     else {
