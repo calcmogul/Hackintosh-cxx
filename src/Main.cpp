@@ -454,15 +454,14 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
     unsigned int threadCount = 20;
 
-    if (!((args.size() == 1 && args[0] == "benchmark") ||
-          (args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
-                                args[0] == "combo")))) {
-        std::cout << "usage: Hackintosh-cxx (brute|dict|combo) <WU> [<WU>...]\n"
-                     "       Hackintosh-cxx benchmark\n"
+    if (!(args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
+                               args[0] == "combo"))) {
+        std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
+                     "|benchmark)\n"
                      "There are " << threadCount << " possible work units "
                   << "(0.." << threadCount - 1 << " inclusive). Pass a space"
                                         "delimited list of the ones to run." <<
-            std::endl;
+        std::endl;
         return 0;
     }
 
@@ -511,9 +510,20 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::future<void>> threads;
 
-    if (args[0] == "benchmark") {
-        threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                        0, 3, 6));
+    if (args[1] == "benchmark") {
+        if (args[0] == "brute") {
+            threads.emplace_back(std::async(std::launch::async, runBruteforce,
+                                            0, 3, 6));
+        }
+        else if (args[0] == "dict") {
+            threads.emplace_back(std::async(std::launch::async,
+                                            runDictionary, 0, words.size() - 1,
+                                            2500));
+        }
+        else if (args[0] == "combo") {
+            threads.emplace_back(std::async(std::launch::async,
+                                            runCombo, 0, 1, 100));
+        }
     }
     else {
         // Spawn worker threads
