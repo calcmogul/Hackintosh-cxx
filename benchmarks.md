@@ -111,6 +111,22 @@ Moved startTime up to outer while loop to avoid including file I/O in timing:
     43.572s
     43.662s
 
+Initial dual-thread benchmark:
+
+    63.413s
+    63.432s
+
+    63.345s
+    63.357s
+
+Made thread-local copy of target hash:
+
+    62.138s
+    62.192s
+
+    62.153s
+    62.206s
+
 # Dictionary
 This benchmark checks 1000 integers appended on 349900 words. The dictionary is included in the source tree. The benchmark is run with "Hackintosh-cxx dict benchmark".
 

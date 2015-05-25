@@ -20,7 +20,7 @@ std::vector<std::string> words;
  * ([97..122] in ASCII)
  */
 
-uint128_t hash;
+uint128_t gHash;
 
 /* Converts index in [0..35] to ASCII table range of [48..57] and [97..122]
  * (Numbers and lowercase letters)
@@ -53,6 +53,7 @@ void incSearchSpaceSlot(char& pos) {
  * 'endChar' determines where to stop.
  */
 void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
+    uint128_t hash = gHash;
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
     char endChar = cvtSearchSpacePosToASCII(endPos);
     unsigned int checkptCount = 0;
@@ -119,7 +120,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
-    while (password.length() <= (unsigned int) maximum) {
+    while (password.length() <= static_cast<unsigned int>(maximum)) {
         bool overflow = false;
         while (!overflow) {
             MD5 md5 = MD5(password);
@@ -203,6 +204,7 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
 }
 
 void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
+    uint128_t hash = gHash;
     unsigned int checkptCount = 0;
 
     std::string numSuffix = "-1";
@@ -302,6 +304,7 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
 }
 
 void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
+    uint128_t hash = gHash;
     unsigned int checkptCount = 0;
 
     std::string nameStub = "combo-";
@@ -492,7 +495,7 @@ int main(int argc, char* argv[]) {
     // std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
     // std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
     std::string hashStr = "97d3b89397f99594a4981fc6b0cb31b0";
-    uint8_t* temp = reinterpret_cast<uint8_t*>(&hash);
+    uint8_t* temp = reinterpret_cast<uint8_t*>(&gHash);
     for (unsigned int i = 0; i < 16; i++) {
         temp[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
     }
@@ -503,6 +506,8 @@ int main(int argc, char* argv[]) {
         if (args[0] == "brute") {
             threads.emplace_back(std::async(std::launch::async, runBruteforce,
                                             0, 3, 6));
+            threads.emplace_back(std::async(std::launch::async, runBruteforce,
+                                            4, 7, 6));
         }
         else if (args[0] == "dict") {
             threads.emplace_back(std::async(std::launch::async,
