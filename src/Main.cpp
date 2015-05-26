@@ -506,6 +506,10 @@ int main(int argc, char* argv[]) {
         if (args[0] == "brute") {
             threads.emplace_back(std::async(std::launch::async, runBruteforce,
                                             0, 3, 6));
+        }
+        else if (args[0] == "brute2") {
+            threads.emplace_back(std::async(std::launch::async, runBruteforce,
+                                            0, 3, 6));
             threads.emplace_back(std::async(std::launch::async, runBruteforce,
                                             4, 7, 6));
         }
@@ -565,7 +569,7 @@ int main(int argc, char* argv[]) {
     while (!threadsDead) {
         threadsDead = true;
         for (auto& thread : threads) {
-            if (thread.wait_for(0s) == std::future_status::deferred) {
+            if (thread.wait_for(250ms) == std::future_status::deferred) {
                 threadsDead = false;
                 break;
             }

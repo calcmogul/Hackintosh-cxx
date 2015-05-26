@@ -49,7 +49,7 @@ static_assert(sizeof(char) == sizeof(uint8_t), "char isn't 8 bits");
 static_assert(sizeof(int) == sizeof(uint32_t), "int isn't 32 bits");
 typedef __uint128_t uint128_t;
 
-class MD5 {
+class [[gnu::packed]] MD5 {
 public:
     typedef unsigned int size_type; // must be 32bit
 

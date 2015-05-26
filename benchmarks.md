@@ -111,6 +111,16 @@ Moved startTime up to outer while loop to avoid including file I/O in timing:
     43.572s
     43.662s
 
+Before adding [[gnu::packed]] attribute to MD5 class:
+
+    44.214s
+    44.248s
+
+After adding [[gnu::packed]] attribute to MD5 class:
+
+    43.886s
+    43.885s
+
 Initial dual-thread benchmark:
 
     63.413s
