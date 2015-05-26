@@ -51,7 +51,7 @@ typedef __uint128_t uint128_t;
 
 class [[gnu::packed]] MD5 {
 public:
-    typedef unsigned int size_type; // must be 32bit
+    typedef uint32_t size_type;
 
     MD5();
     explicit MD5(const std::string& text);
