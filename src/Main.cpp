@@ -451,7 +451,7 @@ int main(int argc, char* argv[]) {
         std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
                      "|benchmark)\n"
                      "There are " << threadCount << " possible work units "
-                  << "(0.." << threadCount - 1 << " inclusive). Pass a space"
+                  << "(0.." << threadCount - 1 << " inclusive). Pass a space "
                                         "delimited list of the ones to run." <<
             std::endl;
         return 0;
