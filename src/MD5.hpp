@@ -68,7 +68,7 @@ private:
     static void encode(uint8_t output[], const uint32_t input[], size_type len);
 
     uint8_t m_buffer[blocksize]; // bytes that didn't fit in last 64 byte chunk
-    uint32_t m_count[2]; // 64bit counter for number of bits (lo, hi)
+    uint64_t m_count; // counter for number of bits
     uint32_t m_state[4]; // digest so far
     uint128_t m_digest; // the result
     bool m_finalized;

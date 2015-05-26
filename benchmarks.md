@@ -127,6 +127,13 @@ Removed unnecessary memset operations on MD5 buffers:
     42.486s
     42.491s
     42.426s
+    42.422s
+
+MD5::m_count changed from uint32_t[2] to uint64_t:
+
+    42.496s
+    42.494s
+    42.475s
 
 Initial dual-thread benchmark:
 

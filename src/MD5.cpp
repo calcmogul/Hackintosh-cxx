@@ -33,7 +33,6 @@
 #include "MD5.hpp"
 
 #include <cstring>
-#include <cstdio>
 
 // Constants for MD5Transform routine.
 #define S11 7
@@ -120,8 +119,7 @@ inline void MD5::II(uint32_t& a,
 MD5::MD5() {
     m_finalized = false;
 
-    m_count[0] = 0;
-    m_count[1] = 0;
+    m_count = 0;
 
     // load magic initialization constants.
     m_state[0] = 0x67452301;
@@ -245,13 +243,10 @@ void MD5::transform(const uint8_t block[blocksize]) {
 // operation, processing another message block
 void MD5::update(const unsigned char input[], size_type length) {
     // compute number of bytes mod 64
-    size_type index = m_count[0] / 8 % blocksize;
+    size_type index = m_count / 8 % blocksize;
 
     // Update number of bits
-    if ((m_count[0] += (length << 3)) < (length << 3)) {
-        m_count[1]++;
-    }
-    m_count[1] += (length >> 29);
+    m_count += length * 8;
 
     // number of bytes we need to fill in buffer
     size_type firstpart = 64 - index;
@@ -297,10 +292,10 @@ void MD5::finalize() {
     if (!m_finalized) {
         // Save number of bits
         unsigned char bits[8];
-        encode(bits, m_count, 8);
+        encode(bits, reinterpret_cast<uint32_t*>(&m_count), 8);
 
         // pad out to 56 mod 64.
-        size_type index = m_count[0] / 8 % 64;
+        size_type index = m_count / 8 % 64;
         size_type padLen = (index < 56) ? (56 - index) : (120 - index);
         update(padding, padLen);
 
