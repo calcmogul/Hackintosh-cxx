@@ -120,6 +120,13 @@ After adding [[gnu::packed]] attribute to MD5 class:
 
     43.886s
     43.885s
+    43.798s
+
+Removed unnecessary memset operations on MD5 buffers:
+
+    42.486s
+    42.491s
+    42.426s
 
 Initial dual-thread benchmark:
 

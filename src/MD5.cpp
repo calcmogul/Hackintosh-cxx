@@ -239,9 +239,6 @@ void MD5::transform(const uint8_t block[blocksize]) {
     m_state[1] += b;
     m_state[2] += c;
     m_state[3] += d;
-
-    // Zeroize sensitive information.
-    memset(x, 0, sizeof x);
 }
 
 // MD5 block update operation. Continues an MD5 message-digest
@@ -312,10 +309,6 @@ void MD5::finalize() {
 
         // Store state in digest
         encode((uint8_t*) &m_digest, m_state, 16);
-
-        // Zeroize sensitive information.
-        memset(m_buffer, 0, sizeof m_buffer);
-        memset(m_count, 0, sizeof m_count);
 
         m_finalized = true;
     }
