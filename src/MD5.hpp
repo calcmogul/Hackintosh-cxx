@@ -47,11 +47,11 @@
 
 static_assert(sizeof(char) == sizeof(uint8_t), "char isn't 8 bits");
 static_assert(sizeof(int) == sizeof(uint32_t), "int isn't 32 bits");
-typedef __uint128_t uint128_t;
+using uint128_t = __uint128_t;
 
 class [[gnu::packed]] MD5 {
 public:
-    typedef uint32_t size_type;
+    using size_type = uint32_t;
 
     MD5();
     explicit MD5(const std::string& text);
