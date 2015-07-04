@@ -50,6 +50,7 @@ void incSearchSpaceSlot(char& pos) {
 
 /* 'beginChar' determines where to start brute-force attack in search space.
  * 'endChar' determines where to stop.
+ * 'maximum' determines maximum length of passwords to search.
  */
 void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
     uint128_t hash = gHash;
@@ -202,6 +203,11 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
               << std::endl;
 }
 
+/*
+ * 'dictBegin' contains the index of the dictionary entry at which to start.
+ * 'dictEnd' contains the index of the dictionary entry at which to stop.
+ * 'maximum' determines the maximum length of passwords to search.
+ */
 void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     uint128_t hash = gHash;
     unsigned int checkptCount = 0;
@@ -302,6 +308,11 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
               << std::endl;
 }
 
+/*
+ * 'dictBegin' contains the index of the dictionary entry at which to start.
+ * 'dictEnd' contains the index of the dictionary entry at which to stop.
+ * 'maximum' determines the maximum length of passwords to search.
+ */
 void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
     uint128_t hash = gHash;
     unsigned int checkptCount = 0;
@@ -448,11 +459,13 @@ int main(int argc, char* argv[]) {
     if (!(args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
                                args[0] == "combo"))) {
         std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
-                     "|benchmark)\n"
+                     "|benchmark(#))\n"
                      "There are " << threadCount << " possible work units "
-                  << "(0.." << threadCount - 1 << " inclusive). Pass a space "
-                                        "delimited list of the ones to run." <<
-            std::endl;
+                                                    "(0.." << threadCount - 1
+                  << " inclusive). Pass a space delimited list of the ones to "
+                     "run. Append a number to the benchmark command to run it "
+                     "in that many threads. Valid numbers are 0 through 9 "
+                     "inclusive." << std::endl;
         return 0;
     }
 
@@ -501,25 +514,17 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::thread> threads;
 
-    if (args[1] == "benchmark") {
-        if (args[0] == "brute") {
-            threads.emplace_back(runBruteforce, 0, 3, 6);
+    // "brute" attack
+    if (args[0] == "brute") {
+        if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
+            unsigned char threadMax = args[1][9] - '0';
+            for (unsigned int i = 0; i < threadMax; i++) {
+                threads.emplace_back(runBruteforce, 4 * i, 4 * i + 3, 6);
+            }
         }
-        else if (args[0] == "brute2") {
-            threads.emplace_back(runBruteforce, 0, 3, 6);
-            threads.emplace_back(runBruteforce, 4, 7, 6);
-        }
-        else if (args[0] == "dict") {
-            threads.emplace_back(runDictionary, 0, words.size() - 1, 2500);
-        }
-        else if (args[0] == "combo") {
-            threads.emplace_back(runCombo, 0, 3, 100);
-        }
-    }
-    else {
-        // Spawn worker threads
-        for (unsigned int i = 1; i < args.size(); i++) {
-            if (args[0] == "brute") {
+        else {
+            // Spawn worker threads
+            for (unsigned int i = 1; i < args.size(); i++) {
                 unsigned int beginPos = std::round(std::stoi(args[i]) *
                                                    (36.0 / threadCount));
                 unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
@@ -527,7 +532,19 @@ int main(int argc, char* argv[]) {
 
                 threads.emplace_back(runBruteforce, beginPos, endPos, 16);
             }
-            else if (args[0] == "dict") {
+        }
+    }
+    // "dict" attack
+    else if (args[0] == "dict") {
+        if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
+            unsigned char threadMax = args[1][9] - '0';
+            for (unsigned int i = 0; i < threadMax; i++) {
+                threads.emplace_back(runDictionary, 0, words.size() - 1, 2500);
+            }
+        }
+        else {
+            // Spawn worker threads
+            for (unsigned int i = 1; i < args.size(); i++) {
                 unsigned int beginPos = std::floor(std::stoi(args[i]) *
                                                    (static_cast<float>(words.
                                                                        size()) /
@@ -539,7 +556,19 @@ int main(int argc, char* argv[]) {
                 threads.emplace_back(runDictionary, beginPos, endPos,
                                      999999999);
             }
-            else if (args[0] == "combo") {
+        }
+    }
+    // "combo" attack
+    else if (args[0] == "combo") {
+        if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
+            unsigned char threadMax = args[1][9] - '0';
+            for (int i = 0; i < threadMax; i++) {
+                threads.emplace_back(runCombo, 4 * i, 4 * i + 3, 100);
+            }
+        }
+        else {
+            // Spawn worker threads
+            for (unsigned int i = 1; i < args.size(); i++) {
                 unsigned int beginPos = std::floor(std::stoi(args[i]) *
                                                    (static_cast<float>(words.
                                                                        size()) /
