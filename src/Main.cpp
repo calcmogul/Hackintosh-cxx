@@ -12,7 +12,6 @@
 #include "MD5.hpp"
 
 using namespace std::chrono;
-using namespace std::chrono_literals;
 
 std::vector<std::string> words;
 
@@ -500,27 +499,21 @@ int main(int argc, char* argv[]) {
         temp[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
     }
 
-    std::vector<std::future<void>> threads;
+    std::vector<std::thread> threads;
 
     if (args[1] == "benchmark") {
         if (args[0] == "brute") {
-            threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                            0, 3, 6));
+            threads.emplace_back(runBruteforce, 0, 3, 6);
         }
         else if (args[0] == "brute2") {
-            threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                            0, 3, 6));
-            threads.emplace_back(std::async(std::launch::async, runBruteforce,
-                                            4, 7, 6));
+            threads.emplace_back(runBruteforce, 0, 3, 6);
+            threads.emplace_back(runBruteforce, 4, 7, 6);
         }
         else if (args[0] == "dict") {
-            threads.emplace_back(std::async(std::launch::async,
-                                            runDictionary, 0, words.size() - 1,
-                                            2500));
+            threads.emplace_back(runDictionary, 0, words.size() - 1, 2500);
         }
         else if (args[0] == "combo") {
-            threads.emplace_back(std::async(std::launch::async,
-                                            runCombo, 0, 3, 100));
+            threads.emplace_back(runCombo, 0, 3, 100);
         }
     }
     else {
@@ -532,9 +525,7 @@ int main(int argc, char* argv[]) {
                 unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
                                                  (36.0 / threadCount)) - 1;
 
-                threads.emplace_back(std::async(std::launch::async,
-                                                runBruteforce, beginPos, endPos,
-                                                16));
+                threads.emplace_back(runBruteforce, beginPos, endPos, 16);
             }
             else if (args[0] == "dict") {
                 unsigned int beginPos = std::floor(std::stoi(args[i]) *
@@ -545,9 +536,8 @@ int main(int argc, char* argv[]) {
                                                 (static_cast<float>(words.size())
                                                  / threadCount)) - 1;
 
-                threads.emplace_back(std::async(std::launch::async,
-                                                runDictionary, beginPos, endPos,
-                                                999999999));
+                threads.emplace_back(runDictionary, beginPos, endPos,
+                                     999999999);
             }
             else if (args[0] == "combo") {
                 unsigned int beginPos = std::floor(std::stoi(args[i]) *
@@ -558,22 +548,13 @@ int main(int argc, char* argv[]) {
                                                 (static_cast<float>(words.size())
                                                  / threadCount)) - 1;
 
-                threads.emplace_back(std::async(std::launch::async,
-                                                runCombo, beginPos, endPos,
-                                                1000));
+                threads.emplace_back(runCombo, beginPos, endPos, 1000);
             }
         }
     }
 
-    bool threadsDead = false;
-    while (!threadsDead) {
-        threadsDead = true;
-        for (auto& thread : threads) {
-            if (thread.wait_for(250ms) == std::future_status::deferred) {
-                threadsDead = false;
-                break;
-            }
-        }
+    for (auto& thread : threads) {
+        thread.join();
     }
 
     return 0;
