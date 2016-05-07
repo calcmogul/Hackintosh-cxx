@@ -49,12 +49,12 @@ static_assert(sizeof(char) == sizeof(uint8_t), "char isn't 8 bits");
 static_assert(sizeof(int) == sizeof(uint32_t), "int isn't 32 bits");
 using uint128_t = __uint128_t;
 
-class [[gnu::packed]] MD5 {
+class[[gnu::packed]] MD5{
 public:
     using size_type = uint32_t;
 
     MD5();
-    explicit MD5(const std::string& text);
+    explicit MD5(const std::string & text);
     void update(const unsigned char* buf, size_type length);
     void update(const char* buf, size_type length);
     void finalize();
@@ -79,28 +79,28 @@ private:
     static uint32_t H(uint32_t x, uint32_t y, uint32_t z);
     static uint32_t I(uint32_t x, uint32_t y, uint32_t z);
     static uint32_t rotate_left(uint32_t x, int n);
-    static void FF(uint32_t& a,
+    static void FF(uint32_t & a,
                    uint32_t b,
                    uint32_t c,
                    uint32_t d,
                    uint32_t x,
                    uint32_t s,
                    uint32_t ac);
-    static void GG(uint32_t& a,
+    static void GG(uint32_t & a,
                    uint32_t b,
                    uint32_t c,
                    uint32_t d,
                    uint32_t x,
                    uint32_t s,
                    uint32_t ac);
-    static void HH(uint32_t& a,
+    static void HH(uint32_t & a,
                    uint32_t b,
                    uint32_t c,
                    uint32_t d,
                    uint32_t x,
                    uint32_t s,
                    uint32_t ac);
-    static void II(uint32_t& a,
+    static void II(uint32_t & a,
                    uint32_t b,
                    uint32_t c,
                    uint32_t d,

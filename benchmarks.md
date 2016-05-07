@@ -180,3 +180,15 @@ brute benchmark2
     57.381s and 57.508s
     57.346s and 57.477s
 
+    GCC 5.3.0
+    71.44s and 71.482s
+    71.233s and 71.263s
+    71.245s and 71.277s
+    71.228s and 71.258s
+    71.236s and 71.259s
+
+    GCC 6.1.1
+    54.645s and 69.447s
+    71.533s and 71.556s
+    71.509s and 71.533s
+    71.682s and 71.717s

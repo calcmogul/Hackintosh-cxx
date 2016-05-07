@@ -52,7 +52,9 @@ void incSearchSpaceSlot(char& pos) {
  * 'endChar' determines where to stop.
  * 'maximum' determines maximum length of passwords to search.
  */
-void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum,
+void runBruteforce(unsigned int beginPos,
+                   unsigned int endPos,
+                   int maximum,
                    int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -218,7 +220,9 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum,
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum,
+void runDictionary(unsigned int dictBegin,
+                   unsigned int dictEnd,
+                   int maximum,
                    int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -333,7 +337,9 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum,
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum,
+void runCombo(unsigned int dictBegin,
+              unsigned int dictEnd,
+              int maximum,
               int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -493,9 +499,9 @@ int main(int argc, char* argv[]) {
                      "There are " << threadCount << " possible work units "
                                                     "(0.." << threadCount - 1
                   << " inclusive). Pass a space delimited list of the ones to "
-                     "run. Append a number to the benchmark command to run it "
-                     "in that many threads. Valid numbers are 0 through 9 "
-                     "inclusive." << std::endl;
+            "run. Append a number to the benchmark command to run it "
+            "in that many threads. Valid numbers are 0 through 9 "
+            "inclusive." << std::endl;
         return 0;
     }
 
