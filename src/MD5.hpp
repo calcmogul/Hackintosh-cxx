@@ -33,8 +33,8 @@
 #ifndef MD5_HPP
 #define MD5_HPP
 
-#include <cstdint>
 #include <string>
+#include <cstdint>
 
 // a small class for calculating MD5 hashes of strings or byte arrays
 // it is not meant to be fast or secure
@@ -61,7 +61,7 @@ public:
     uint128_t getDigest();
 
 private:
-    const static int blocksize = 64;
+    constexpr static int blocksize = 64;
 
     void transform(const uint8_t block[blocksize]);
     static void decode(uint32_t output[], const uint8_t input[], size_type len);

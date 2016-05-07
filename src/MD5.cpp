@@ -5,7 +5,7 @@
  *  based on:
  *
  *  md5.h and md5.c
- *  reference implemantion of RFC 1321
+ *  reference implementation of RFC 1321
  *
  *  Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
  *  rights reserved.
@@ -283,7 +283,7 @@ void MD5::update(const char input[], size_type length) {
  * digest and zeroizing the context.
  */
 void MD5::finalize() {
-    static unsigned char padding[64] = {
+    constexpr static unsigned char padding[64] = {
         0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -292,7 +292,7 @@ void MD5::finalize() {
     if (!m_finalized) {
         // Save number of bits
         unsigned char bits[8];
-        encode(bits, reinterpret_cast<uint32_t*>(&m_count), 8);
+        encode(bits, reinterpret_cast<uint32_t*>(&m_count), sizeof(bits));
 
         // pad out to 56 mod 64.
         size_type index = m_count / 8 % 64;
@@ -300,7 +300,7 @@ void MD5::finalize() {
         update(padding, padLen);
 
         // Append length (before padding)
-        update(bits, 8);
+        update(bits, sizeof(bits));
 
         // Store state in digest
         encode((uint8_t*) &m_digest, m_state, 16);

@@ -165,3 +165,18 @@ Initial:
 
     58.306s
 
+brute benchmark1
+    43.216s
+    43.282s
+
+    42.537s
+    42.495s
+    42.558s
+    42.551s
+
+brute benchmark2
+    58.805s and 59.04s
+
+    57.381s and 57.508s
+    57.346s and 57.477s
+

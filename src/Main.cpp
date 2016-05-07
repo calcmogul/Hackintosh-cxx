@@ -1,12 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <thread>
-#include <mutex>
-#include <future>
 #include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <future>
+#include <iostream>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 #include <cmath>
 
 #include "MD5.hpp"
@@ -52,7 +52,17 @@ void incSearchSpaceSlot(char& pos) {
  * 'endChar' determines where to stop.
  * 'maximum' determines maximum length of passwords to search.
  */
-void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
+void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum,
+                   int affinity) {
+    cpu_set_t cpuset;
+    pthread_t thread = pthread_self();
+
+    CPU_ZERO(&cpuset);
+    CPU_SET(affinity, &cpuset);
+    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
+        std::cout << "Failed setting thread affinity" << std::endl;
+    }
+
     uint128_t hash = gHash;
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
     char endChar = cvtSearchSpacePosToASCII(endPos);
@@ -208,7 +218,17 @@ void runBruteforce(unsigned int beginPos, unsigned int endPos, int maximum) {
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
+void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum,
+                   int affinity) {
+    cpu_set_t cpuset;
+    pthread_t thread = pthread_self();
+
+    CPU_ZERO(&cpuset);
+    CPU_SET(affinity, &cpuset);
+    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
+        std::cout << "Failed setting thread affinity" << std::endl;
+    }
+
     uint128_t hash = gHash;
     unsigned int checkptCount = 0;
 
@@ -313,7 +333,17 @@ void runDictionary(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum) {
+void runCombo(unsigned int dictBegin, unsigned int dictEnd, int maximum,
+              int affinity) {
+    cpu_set_t cpuset;
+    pthread_t thread = pthread_self();
+
+    CPU_ZERO(&cpuset);
+    CPU_SET(affinity, &cpuset);
+    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
+        std::cout << "Failed setting thread affinity" << std::endl;
+    }
+
     uint128_t hash = gHash;
     unsigned int checkptCount = 0;
 
@@ -519,7 +549,7 @@ int main(int argc, char* argv[]) {
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
             unsigned char threadMax = args[1][9] - '0';
             for (unsigned int i = 0; i < threadMax; i++) {
-                threads.emplace_back(runBruteforce, 4 * i, 4 * i + 3, 6);
+                threads.emplace_back(runBruteforce, 4 * i, 4 * i + 3, 6, i);
             }
         }
         else {
@@ -530,7 +560,7 @@ int main(int argc, char* argv[]) {
                 unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
                                                  (36.0 / threadCount)) - 1;
 
-                threads.emplace_back(runBruteforce, beginPos, endPos, 16);
+                threads.emplace_back(runBruteforce, beginPos, endPos, 16, i);
             }
         }
     }
@@ -539,7 +569,8 @@ int main(int argc, char* argv[]) {
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
             unsigned char threadMax = args[1][9] - '0';
             for (unsigned int i = 0; i < threadMax; i++) {
-                threads.emplace_back(runDictionary, 0, words.size() - 1, 2500);
+                threads.emplace_back(runDictionary, 0, words.size() - 1, 2500,
+                                     i);
             }
         }
         else {
@@ -554,7 +585,7 @@ int main(int argc, char* argv[]) {
                                                  / threadCount)) - 1;
 
                 threads.emplace_back(runDictionary, beginPos, endPos,
-                                     999999999);
+                                     999999999, i);
             }
         }
     }
@@ -563,7 +594,7 @@ int main(int argc, char* argv[]) {
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
             unsigned char threadMax = args[1][9] - '0';
             for (int i = 0; i < threadMax; i++) {
-                threads.emplace_back(runCombo, 4 * i, 4 * i + 3, 100);
+                threads.emplace_back(runCombo, 4 * i, 4 * i + 3, 100, i);
             }
         }
         else {
@@ -577,7 +608,7 @@ int main(int argc, char* argv[]) {
                                                 (static_cast<float>(words.size())
                                                  / threadCount)) - 1;
 
-                threads.emplace_back(runCombo, beginPos, endPos, 1000);
+                threads.emplace_back(runCombo, beginPos, endPos, 1000, i);
             }
         }
     }
