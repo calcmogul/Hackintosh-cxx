@@ -1,3 +1,4 @@
+#include <cmath>
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -7,7 +8,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <cmath>
 
 #include "MD5.hpp"
 
@@ -130,7 +130,7 @@ void runBruteforce(unsigned int beginPos,
 
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
-    time_point<clock> startTime = clock::now();
+    auto startTime = clock::now();
 
     while (password.length() <= static_cast<unsigned int>(maximum)) {
         bool overflow = false;
