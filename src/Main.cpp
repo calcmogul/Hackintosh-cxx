@@ -1,8 +1,12 @@
-#include <cmath>
+// Copyright (c) Tyler Veness 2015-2016. All Rights Reserved.
+
+#include <stdint.h>
+
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstdlib>
 #include <fstream>
-#include <future>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -24,13 +28,12 @@ uint128_t gHash;
 /* Converts index in [0..35] to ASCII table range of [48..57] and [97..122]
  * (Numbers and lowercase letters)
  */
-unsigned int cvtSearchSpacePosToASCII(unsigned int pos) {
+uint32_t cvtSearchSpacePosToASCII(uint32_t pos) {
     // Use number range in ASCII table
     if (pos <= 9) {
         return 48 + pos;
-    }
-    // Else use alphabet later in table
-    else {
+    } else {
+        // Else use alphabet later in table
         return 97 + (pos - 10);
     }
 }
@@ -41,8 +44,7 @@ void incSearchSpaceSlot(char& pos) {
     if (pos == '9') {
         // Skip to 'a'
         pos = 'a';
-    }
-    else {
+    } else {
         // Increment normally
         pos++;
     }
@@ -52,9 +54,7 @@ void incSearchSpaceSlot(char& pos) {
  * 'endChar' determines where to stop.
  * 'maximum' determines maximum length of passwords to search.
  */
-void runBruteforce(unsigned int beginPos,
-                   unsigned int endPos,
-                   int maximum,
+void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
                    int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -68,7 +68,7 @@ void runBruteforce(unsigned int beginPos,
     uint128_t hash = gHash;
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
     char endChar = cvtSearchSpacePosToASCII(endPos);
-    unsigned int checkptCount = 0;
+    uint32_t checkptCount = 0;
 
     std::string password;
     password.reserve(maximum);
@@ -90,17 +90,15 @@ void runBruteforce(unsigned int beginPos,
         save.clear();
 
         if (checkpoint.length() > 0) {
-            std::cout << "Restored from latest password: " << checkpoint <<
-                std::endl;
+            std::cout << "Restored from latest password: " << checkpoint
+                      << std::endl;
             password = checkpoint;
-        }
-        else {
+        } else {
             password = beginChar;
         }
 
         save.close();
-    }
-    else {
+    } else {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
@@ -111,13 +109,13 @@ void runBruteforce(unsigned int beginPos,
     std::ofstream passwords(nameStub + "-passwds.txt",
                             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
-        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
-            std::endl;
-        exit(1);
+        std::cout << "Failed to open " << nameStub + "-passwds.txt"
+                  << std::endl;
+        std::exit(1);
     }
 
     std::string endPassword(1, endChar);
-    for (unsigned int i = 1; i < password.length(); i++) {
+    for (uint32_t i = 1; i < password.length(); i++) {
         endPassword += 'z';
     }
 
@@ -132,7 +130,7 @@ void runBruteforce(unsigned int beginPos,
     using clock = std::chrono::system_clock;
     auto startTime = clock::now();
 
-    while (password.length() <= static_cast<unsigned int>(maximum)) {
+    while (password.length() <= static_cast<uint32_t>(maximum)) {
         bool overflow = false;
         while (!overflow) {
             MD5 md5 = MD5(password);
@@ -158,12 +156,11 @@ void runBruteforce(unsigned int beginPos,
                 save.flush();
 
                 checkptCount = 0;
-            }
-            else {
+            } else {
                 checkptCount++;
             }
 
-            unsigned int pos = password.length() - 1;
+            uint32_t pos = password.length() - 1;
 
             // Increment right-most character
             incSearchSpaceSlot(password[pos]);
@@ -203,16 +200,15 @@ void runBruteforce(unsigned int beginPos,
 
         // Set all characters in string to start of this thread's partition
         password[0] = beginChar;
-        for (unsigned int i = 1; i < password.length() - 1; i++) {
+        for (uint32_t i = 1; i < password.length() - 1; i++) {
             password[i] = '0';
         }
     }
 
     std::cout << "elapsed: "
               << duration_cast<milliseconds>(clock::now() - startTime).count() /
-        1000.f
-              << "s"
-              << std::endl;
+                     1000.f
+              << "s" << std::endl;
 }
 
 /*
@@ -220,9 +216,7 @@ void runBruteforce(unsigned int beginPos,
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runDictionary(unsigned int dictBegin,
-                   unsigned int dictEnd,
-                   int maximum,
+void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
                    int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -234,7 +228,7 @@ void runDictionary(unsigned int dictBegin,
     }
 
     uint128_t hash = gHash;
-    unsigned int checkptCount = 0;
+    uint32_t checkptCount = 0;
 
     std::string numSuffix = "-1";
 
@@ -255,14 +249,13 @@ void runDictionary(unsigned int dictBegin,
         save.clear();
 
         if (checkpoint.length() > 0) {
-            std::cout << "Restored from latest password: " << checkpoint <<
-                std::endl;
+            std::cout << "Restored from latest password: " << checkpoint
+                      << std::endl;
             numSuffix = checkpoint;
         }
 
         save.close();
-    }
-    else {
+    } else {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
@@ -273,9 +266,9 @@ void runDictionary(unsigned int dictBegin,
     std::ofstream passwords(nameStub + "-passwds.txt",
                             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
-        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
-            std::endl;
-        exit(1);
+        std::cout << "Failed to open " << nameStub + "-passwds.txt"
+                  << std::endl;
+        std::exit(1);
     }
 
     // Prepare timing for checkpoints
@@ -286,19 +279,18 @@ void runDictionary(unsigned int dictBegin,
          currentNum++) {
         numSuffix = std::to_string(currentNum);
 
-        for (unsigned int i = dictBegin; i <= dictEnd; i++) {
+        for (uint32_t i = dictBegin; i <= dictEnd; i++) {
             if (currentNum != -1) {
                 MD5 md5 = MD5(words[i] + numSuffix);
                 if (md5.getDigest() == hash) {
-                    std::cout << words[i] + numSuffix << " is a password" <<
-                        std::endl;
+                    std::cout << words[i] + numSuffix << " is a password"
+                              << std::endl;
 
                     // Save password
                     passwords << words[i] + numSuffix;
                     passwords.flush();
                 }
-            }
-            else {
+            } else {
                 MD5 md5 = MD5(words[i]);
                 if (md5.getDigest() == hash) {
                     std::cout << words[i] << " is a password" << std::endl;
@@ -318,8 +310,7 @@ void runDictionary(unsigned int dictBegin,
                 save.flush();
 
                 checkptCount = 0;
-            }
-            else {
+            } else {
                 checkptCount++;
             }
         }
@@ -327,9 +318,8 @@ void runDictionary(unsigned int dictBegin,
 
     std::cout << "elapsed: "
               << duration_cast<milliseconds>(clock::now() - startTime).count() /
-        1000.f
-              << "s"
-              << std::endl;
+                     1000.f
+              << "s" << std::endl;
 }
 
 /*
@@ -337,10 +327,7 @@ void runDictionary(unsigned int dictBegin,
  * 'dictEnd' contains the index of the dictionary entry at which to stop.
  * 'maximum' determines the maximum length of passwords to search.
  */
-void runCombo(unsigned int dictBegin,
-              unsigned int dictEnd,
-              int maximum,
-              int affinity) {
+void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
 
@@ -351,7 +338,7 @@ void runCombo(unsigned int dictBegin,
     }
 
     uint128_t hash = gHash;
-    unsigned int checkptCount = 0;
+    uint32_t checkptCount = 0;
 
     std::string nameStub = "combo-";
     nameStub += std::to_string(dictBegin);
@@ -371,14 +358,12 @@ void runCombo(unsigned int dictBegin,
 
         if (checkpoint.length() > 0) {
             std::cout << "Restored from latest password: "
-                      << words[std::stoi(checkpoint)]
-                      << std::endl;
+                      << words[std::stoi(checkpoint)] << std::endl;
             dictBegin = std::stoi(checkpoint);
         }
 
         save.close();
-    }
-    else {
+    } else {
         std::cout << "Failed to open " << nameStub + ".txt" << std::endl;
     }
 
@@ -389,9 +374,9 @@ void runCombo(unsigned int dictBegin,
     std::ofstream passwords(nameStub + "-passwds.txt",
                             std::fstream::out | std::ofstream::app);
     if (!passwords.is_open()) {
-        std::cout << "Failed to open " << nameStub + "-passwds.txt" <<
-            std::endl;
-        exit(1);
+        std::cout << "Failed to open " << nameStub + "-passwds.txt"
+                  << std::endl;
+        std::exit(1);
     }
 
     // Prepare timing for checkpoints
@@ -399,8 +384,8 @@ void runCombo(unsigned int dictBegin,
     time_point<clock> startTime = clock::now();
 
     std::string numStr;
-    for (unsigned int i = dictBegin; i <= dictEnd; i++) {
-        for (unsigned int j = 0; j < words.size(); j++) {
+    for (uint32_t i = dictBegin; i <= dictEnd; i++) {
+        for (uint32_t j = 0; j < words.size(); j++) {
             // Don't check for possibility that there is no number suffix
             numStr = "0";
             while (numStr.length() <= 2) {
@@ -417,19 +402,19 @@ void runCombo(unsigned int dictBegin,
                     }
                 }
 
-                unsigned int pos = numStr.length() - 1;
+                uint32_t pos = numStr.length() - 1;
 
                 // Increment right-most character
                 numStr[pos]++;
 
-                /* While there are overflows occurring by carrying digits and the
-                 * whole string hasn't overflowed.
+                /* While there are overflows occurring by carrying digits and
+                 * the whole string hasn't overflowed.
                  *
                  * The contents of this while loop would crash at
                  * "incSearchSpaceSlot(password[pos]);" if "password" were a
                  * one-character string, but comparing against endPassword is
-                 * sufficient to terminate the "while (!overflow)" loop before that
-                 * can happen.
+                 * sufficient to terminate the "while (!overflow)" loop before
+                 * that can happen.
                  */
                 while (numStr[pos] == '9' + 1) {
                     /* Carries are occurring. If there is no place to which to
@@ -439,10 +424,9 @@ void runCombo(unsigned int dictBegin,
                         // Increase string size, then reset string
                         numStr += '0';
 
-                        // Set all characters in string to start of this thread's partition
-                        for (unsigned int k = 0;
-                             k < numStr.length() - 1;
-                             k++) {
+                        // Set all characters in string to start of this
+                        // thread's partition
+                        for (uint32_t k = 0; k < numStr.length() - 1; k++) {
                             numStr[k] = '0';
                         }
                         break;
@@ -465,8 +449,7 @@ void runCombo(unsigned int dictBegin,
                     save.flush();
 
                     checkptCount = 0;
-                }
-                else {
+                } else {
                     checkptCount++;
                 }
             }
@@ -475,7 +458,7 @@ void runCombo(unsigned int dictBegin,
             numStr += '0';
 
             // Set all characters in string to start of this thread's partition
-            for (unsigned int i = 0; i < numStr.length() - 1; i++) {
+            for (uint32_t i = 0; i < numStr.length() - 1; i++) {
                 numStr[i] = '0';
             }
         }
@@ -483,25 +466,27 @@ void runCombo(unsigned int dictBegin,
 
     std::cout << "elapsed: "
               << duration_cast<milliseconds>(clock::now() - startTime).count() /
-        1000.f
-              << "s"
-              << std::endl;
+                     1000.f
+              << "s" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
-    unsigned int threadCount = 20;
+    uint32_t threadCount = 20;
 
-    if (!(args.size() >= 2 && (args[0] == "brute" || args[0] == "dict" ||
-                               args[0] == "combo"))) {
+    if (!(args.size() >= 2 &&
+          (args[0] == "brute" || args[0] == "dict" || args[0] == "combo"))) {
         std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
                      "|benchmark(#))\n"
-                     "There are " << threadCount << " possible work units "
-                                                    "(0.." << threadCount - 1
+                     "There are "
+                  << threadCount << " possible work units "
+                                    "(0.."
+                  << threadCount - 1
                   << " inclusive). Pass a space delimited list of the ones to "
-            "run. Append a number to the benchmark command to run it "
-            "in that many threads. Valid numbers are 0 through 9 "
-            "inclusive." << std::endl;
+                     "run. Append a number to the benchmark command to run it "
+                     "in that many threads. Valid numbers are 0 through 9 "
+                     "inclusive."
+                  << std::endl;
         return 0;
     }
 
@@ -513,13 +498,11 @@ int main(int argc, char* argv[]) {
             while (std::getline(dict, buffer)) {
                 words.push_back(buffer);
             }
-        }
-        else {
+        } else {
             std::cout << "Failed to open dictionary." << std::endl;
             return 0;
         }
-    }
-    else if (args[0] == "combo") {
+    } else if (args[0] == "combo") {
         std::ifstream dict("dictionary.txt");
         if (dict.is_open()) {
             std::string buffer;
@@ -529,11 +512,9 @@ int main(int argc, char* argv[]) {
                 words.push_back(buffer);
             }
 
-            std::sort(words.begin(), words.end(), [] (auto& i, auto& j) {
-                return i.length() < j.length();
-            });
-        }
-        else {
+            std::sort(words.begin(), words.end(),
+                      [](auto& i, auto& j) { return i.length() < j.length(); });
+        } else {
             std::cout << "Failed to open dictionary." << std::endl;
             return 0;
         }
@@ -543,8 +524,8 @@ int main(int argc, char* argv[]) {
     // std::string hashStr = "5f4dcc3b5aa765d61d8327deb882cf99";
     // std::string hashStr = "3b11bfdbd675feb0297894dac03a8c04";
     std::string hashStr = "97d3b89397f99594a4981fc6b0cb31b0";
-    uint8_t* temp = reinterpret_cast<uint8_t*>(&gHash);
-    for (unsigned int i = 0; i < 16; i++) {
+    auto temp = reinterpret_cast<uint8_t*>(&gHash);
+    for (uint32_t i = 0; i < 16; i++) {
         temp[i] = std::stoi(hashStr.substr(2 * i, 2), 0, 16);
     }
 
@@ -553,66 +534,64 @@ int main(int argc, char* argv[]) {
     // "brute" attack
     if (args[0] == "brute") {
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
-            unsigned char threadMax = args[1][9] - '0';
-            for (unsigned int i = 0; i < threadMax; i++) {
+            uint8_t threadMax = args[1][9] - '0';
+            for (uint32_t i = 0; i < threadMax; i++) {
                 threads.emplace_back(runBruteforce, 4 * i, 4 * i + 3, 6, i);
             }
-        }
-        else {
+        } else {
             // Spawn worker threads
-            for (unsigned int i = 1; i < args.size(); i++) {
-                unsigned int beginPos = std::round(std::stoi(args[i]) *
-                                                   (36.0 / threadCount));
-                unsigned int endPos = std::round((std::stoi(args[i]) + 1) *
-                                                 (36.0 / threadCount)) - 1;
+            for (uint32_t i = 1; i < args.size(); i++) {
+                uint32_t beginPos =
+                    std::round(std::stoi(args[i]) * (36.0 / threadCount));
+                uint32_t endPos = std::round((std::stoi(args[i]) + 1) *
+                                             (36.0 / threadCount)) -
+                                  1;
 
                 threads.emplace_back(runBruteforce, beginPos, endPos, 16, i);
             }
         }
-    }
-    // "dict" attack
-    else if (args[0] == "dict") {
+    } else if (args[0] == "dict") {
+        // "dict" attack
+
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
-            unsigned char threadMax = args[1][9] - '0';
-            for (unsigned int i = 0; i < threadMax; i++) {
+            uint8_t threadMax = args[1][9] - '0';
+            for (uint32_t i = 0; i < threadMax; i++) {
                 threads.emplace_back(runDictionary, 0, words.size() - 1, 2500,
                                      i);
             }
-        }
-        else {
+        } else {
             // Spawn worker threads
-            for (unsigned int i = 1; i < args.size(); i++) {
-                unsigned int beginPos = std::floor(std::stoi(args[i]) *
-                                                   (static_cast<float>(words.
-                                                                       size()) /
-                                                    threadCount));
-                unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
-                                                (static_cast<float>(words.size())
-                                                 / threadCount)) - 1;
+            for (uint32_t i = 1; i < args.size(); i++) {
+                uint32_t beginPos = std::floor(
+                    std::stoi(args[i]) *
+                    (static_cast<float>(words.size()) / threadCount));
+                uint32_t endPos = std::ceil((std::stoi(args[i]) + 1) *
+                                            (static_cast<float>(words.size()) /
+                                             threadCount)) -
+                                  1;
 
-                threads.emplace_back(runDictionary, beginPos, endPos,
-                                     999999999, i);
+                threads.emplace_back(runDictionary, beginPos, endPos, 999999999,
+                                     i);
             }
         }
-    }
-    // "combo" attack
-    else if (args[0] == "combo") {
+    } else if (args[0] == "combo") {
+        // "combo" attack
+
         if (args[1].substr(0, 9) == "benchmark" && args[1].length() > 9) {
-            unsigned char threadMax = args[1][9] - '0';
+            uint8_t threadMax = args[1][9] - '0';
             for (int i = 0; i < threadMax; i++) {
                 threads.emplace_back(runCombo, 4 * i, 4 * i + 3, 100, i);
             }
-        }
-        else {
+        } else {
             // Spawn worker threads
-            for (unsigned int i = 1; i < args.size(); i++) {
-                unsigned int beginPos = std::floor(std::stoi(args[i]) *
-                                                   (static_cast<float>(words.
-                                                                       size()) /
-                                                    threadCount));
-                unsigned int endPos = std::ceil((std::stoi(args[i]) + 1) *
-                                                (static_cast<float>(words.size())
-                                                 / threadCount)) - 1;
+            for (uint32_t i = 1; i < args.size(); i++) {
+                uint32_t beginPos = std::floor(
+                    std::stoi(args[i]) *
+                    (static_cast<float>(words.size()) / threadCount));
+                uint32_t endPos = std::ceil((std::stoi(args[i]) + 1) *
+                                            (static_cast<float>(words.size()) /
+                                             threadCount)) -
+                                  1;
 
                 threads.emplace_back(runCombo, beginPos, endPos, 1000, i);
             }
@@ -625,4 +604,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-

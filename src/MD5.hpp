@@ -33,7 +33,8 @@
 #ifndef MD5_HPP
 #define MD5_HPP
 
-#include <cstdint>
+#include <stdint.h>
+
 #include <string>
 
 // a small class for calculating MD5 hashes of strings or byte arrays
@@ -49,28 +50,27 @@ static_assert(sizeof(char) == sizeof(uint8_t), "char isn't 8 bits");
 static_assert(sizeof(int) == sizeof(uint32_t), "int isn't 32 bits");
 using uint128_t = __uint128_t;
 
-class[[gnu::packed]] MD5{
+class[[gnu::packed]] MD5 {
 public:
-    using size_type = uint32_t;
-
     MD5();
-    explicit MD5(const std::string & text);
-    void update(const unsigned char* buf, size_type length);
-    void update(const char* buf, size_type length);
+    explicit MD5(const std::string& text);
+    void update(const unsigned char* buf, uint32_t length);
+    void update(const char* buf, uint32_t length);
     void finalize();
     uint128_t getDigest();
 
 private:
-    constexpr static int blocksize = 64;
+    constexpr static int kBlockSize = 64;
 
-    void transform(const uint8_t block[blocksize]);
-    static void decode(uint32_t output[], const uint8_t input[], size_type len);
-    static void encode(uint8_t output[], const uint32_t input[], size_type len);
+    void transform(const uint8_t block[kBlockSize]);
+    static void decode(uint32_t output[], const uint8_t input[], uint32_t len);
+    static void encode(uint8_t output[], const uint32_t input[], uint32_t len);
 
-    uint8_t m_buffer[blocksize]; // bytes that didn't fit in last 64 byte chunk
-    uint64_t m_count; // counter for number of bits
-    uint32_t m_state[4]; // digest so far
-    uint128_t m_digest; // the result
+    uint8_t
+        m_buffer[kBlockSize];  // bytes that didn't fit in last 64 byte chunk
+    uint64_t m_count;          // counter for number of bits
+    uint32_t m_state[4];       // digest so far
+    uint128_t m_digest;        // the result
     bool m_finalized;
 
     // low level logic operations
@@ -79,35 +79,14 @@ private:
     static uint32_t H(uint32_t x, uint32_t y, uint32_t z);
     static uint32_t I(uint32_t x, uint32_t y, uint32_t z);
     static uint32_t rotate_left(uint32_t x, int n);
-    static void FF(uint32_t & a,
-                   uint32_t b,
-                   uint32_t c,
-                   uint32_t d,
-                   uint32_t x,
-                   uint32_t s,
-                   uint32_t ac);
-    static void GG(uint32_t & a,
-                   uint32_t b,
-                   uint32_t c,
-                   uint32_t d,
-                   uint32_t x,
-                   uint32_t s,
-                   uint32_t ac);
-    static void HH(uint32_t & a,
-                   uint32_t b,
-                   uint32_t c,
-                   uint32_t d,
-                   uint32_t x,
-                   uint32_t s,
-                   uint32_t ac);
-    static void II(uint32_t & a,
-                   uint32_t b,
-                   uint32_t c,
-                   uint32_t d,
-                   uint32_t x,
-                   uint32_t s,
-                   uint32_t ac);
+    static void FF(uint32_t & a, uint32_t b, uint32_t c, uint32_t d, uint32_t x,
+                   uint32_t s, uint32_t ac);
+    static void GG(uint32_t & a, uint32_t b, uint32_t c, uint32_t d, uint32_t x,
+                   uint32_t s, uint32_t ac);
+    static void HH(uint32_t & a, uint32_t b, uint32_t c, uint32_t d, uint32_t x,
+                   uint32_t s, uint32_t ac);
+    static void II(uint32_t & a, uint32_t b, uint32_t c, uint32_t d, uint32_t x,
+                   uint32_t s, uint32_t ac);
 };
 
-#endif // MD5_HPP
-
+#endif  // MD5_HPP
