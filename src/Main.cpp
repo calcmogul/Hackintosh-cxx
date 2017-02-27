@@ -56,6 +56,7 @@ void incSearchSpaceSlot(char& pos) {
  */
 void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
                    int affinity) {
+#ifndef _WIN32
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
 
@@ -64,6 +65,7 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
     if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
         std::cout << "Failed setting thread affinity" << std::endl;
     }
+#endif  // _WIN32
 
     uint128_t hash = gHash;
     char beginChar = cvtSearchSpacePosToASCII(beginPos);
@@ -218,6 +220,7 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
  */
 void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
                    int affinity) {
+#ifndef _WIN32
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
 
@@ -226,6 +229,7 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
     if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
         std::cout << "Failed setting thread affinity" << std::endl;
     }
+#endif  // _WIN32
 
     uint128_t hash = gHash;
     uint32_t checkptCount = 0;
@@ -328,6 +332,7 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
  * 'maximum' determines the maximum length of passwords to search.
  */
 void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
+#ifndef _WIN32
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
 
@@ -336,6 +341,7 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
     if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
         std::cout << "Failed setting thread affinity" << std::endl;
     }
+#endif  // _WIN32
 
     uint128_t hash = gHash;
     uint32_t checkptCount = 0;
