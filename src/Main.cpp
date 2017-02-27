@@ -13,9 +13,11 @@
 #include <thread>
 #include <vector>
 
-#include "MD5.hpp"
+#include <openssl/md5.h>
 
 using namespace std::chrono;
+
+using uint128_t = __uint128_t;
 
 std::vector<std::string> words;
 
@@ -130,19 +132,22 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
      * If password starts at 'd', 'd0', 'd00', etc. then endHash should contain
      * 'd', 'dz', 'dzz', etc.
      */
-    MD5 md5 = MD5(endPassword);
-    uint128_t endHash = md5.getDigest();
+    uint128_t endHash;
+    MD5(reinterpret_cast<const unsigned char*>(endPassword.c_str()),
+        endPassword.length(), reinterpret_cast<unsigned char*>(&endHash));
 
     // Prepare timing for checkpoints
     using clock = std::chrono::system_clock;
     auto startTime = clock::now();
 
+    uint128_t digest;
     while (password.length() <= static_cast<uint32_t>(maximum)) {
         bool overflow = false;
         while (!overflow) {
-            MD5 md5 = MD5(password);
+            MD5(reinterpret_cast<const unsigned char*>(password.c_str()),
+                password.length(), reinterpret_cast<unsigned char*>(&digest));
 
-            if (md5.getDigest() == hash) {
+            if (digest == hash) {
                 std::cout << password << " is a password" << std::endl;
 
                 // Save password
@@ -150,7 +155,7 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
                 passwords.flush();
             }
 
-            if (md5.getDigest() == endHash) {
+            if (digest == endHash) {
                 break;
             }
 
@@ -202,8 +207,8 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
         // Increase string size, then reset string
         password += '0';
         endPassword += 'z';
-        MD5 md5 = MD5(endPassword);
-        endHash = md5.getDigest();
+        MD5(reinterpret_cast<const unsigned char*>(endPassword.c_str()),
+            endPassword.length(), reinterpret_cast<unsigned char*>(&endHash));
 
         // Set all characters in string to start of this thread's partition
         password[0] = beginChar;
@@ -284,14 +289,18 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
     using clock = std::chrono::system_clock;
     time_point<clock> startTime = clock::now();
 
+    uint128_t digest;
     for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
          currentNum++) {
         numSuffix = std::to_string(currentNum);
 
         for (uint32_t i = dictBegin; i <= dictEnd; i++) {
             if (currentNum != -1) {
-                MD5 md5 = MD5(words[i] + numSuffix);
-                if (md5.getDigest() == hash) {
+                MD5(reinterpret_cast<const unsigned char*>(
+                        (words[i] + numSuffix).c_str()),
+                    (words[i] + numSuffix).length(),
+                    reinterpret_cast<unsigned char*>(&digest));
+                if (digest == hash) {
                     std::cout << words[i] + numSuffix << " is a password"
                               << std::endl;
 
@@ -300,8 +309,10 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
                     passwords.flush();
                 }
             } else {
-                MD5 md5 = MD5(words[i]);
-                if (md5.getDigest() == hash) {
+                MD5(reinterpret_cast<const unsigned char*>(words[i].c_str()),
+                    words[i].length(),
+                    reinterpret_cast<unsigned char*>(&digest));
+                if (digest == hash) {
                     std::cout << words[i] << " is a password" << std::endl;
 
                     // Save password
@@ -395,6 +406,7 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
     time_point<clock> startTime = clock::now();
 
     std::string numStr;
+    uint128_t digest;
     for (uint32_t i = dictBegin; i <= dictEnd; i++) {
         for (uint32_t j = 0; j < words.size(); j++) {
             // Don't check for possibility that there is no number suffix
@@ -402,8 +414,11 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
             while (numStr.length() <= 2) {
                 if (words[i].length() + words[j].length() + numStr.length() >=
                     9) {
-                    MD5 md5 = MD5(words[i] + words[j] + numStr);
-                    if (md5.getDigest() == hash) {
+                    MD5(reinterpret_cast<const unsigned char*>(
+                            (words[i] + words[j] + numStr).c_str()),
+                        (words[i] + words[j] + numStr).length(),
+                        reinterpret_cast<unsigned char*>(&digest));
+                    if (digest == hash) {
                         std::cout << words[i] + words[j] + numStr
                                   << " is a password" << std::endl;
 

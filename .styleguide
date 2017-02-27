@@ -39,6 +39,7 @@ includeCppSys {
 }
 
 includeOtherLibs {
+  openssl
 }
 
 includeProject {
