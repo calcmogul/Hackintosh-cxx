@@ -18,14 +18,11 @@ genFolderExclude {
 }
 
 genFileExclude {
-  \.d$
-  \.o$
   \.txt$
   Hackintosh-cxx$
 }
 
 modifiableFolderExclude {
-  \.git
 }
 
 modifiableFileExclude {

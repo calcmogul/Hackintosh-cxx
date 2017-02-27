@@ -1,4 +1,4 @@
-// Copyright (c) Tyler Veness 2015-2016. All Rights Reserved.
+// Copyright (c) Tyler Veness 2015-2017. All Rights Reserved.
 
 #include <stdint.h>
 
