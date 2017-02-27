@@ -16,13 +16,13 @@ NAME := Hackintosh-cxx
 # (e.g. x86_64-w64-mingw32-)
 PREFIX :=
 
-CC := gcc
+CC := clang
 CFLAGS_DEBUG := -O0 -g3 -Wall -std=c11
-CFLAGS_RELEASE := -O3 -Wall -s -std=c11 -flto
+CFLAGS_RELEASE := -O3 -Wall -std=c11 -flto
 
-CXX := g++
+CXX := clang++
 CXXFLAGS_DEBUG := -O0 -g3 -Wall -std=c++1y -march=native
-CXXFLAGS_RELEASE := -O3 -Wall -s -std=c++1y -flto -march=native
+CXXFLAGS_RELEASE := -O3 -Wall -std=c++14 -flto -stdlib=libstdc++
 
 RC := windres
 
@@ -30,7 +30,7 @@ RC := windres
 DEFINES_DEBUG :=
 DEFINES_RELEASE :=
 
-LD := g++
+LD := clang++
 
 # Platform specific variables
 ifeq ($(OS), Windows_NT)
