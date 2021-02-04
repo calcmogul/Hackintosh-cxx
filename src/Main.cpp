@@ -25,16 +25,19 @@ std::vector<std::string> words;
 
 uint128_t gHash;
 
-/* Converts index in [0..35] to ASCII table range of [48..57] and [97..122]
- * (Numbers and lowercase letters)
+/* Converts index in [0..61] to ASCII table range of [48..57], [65..90], and
+ * [97..122] (Numbers, uppercase letters, and lowercase letters)
  */
 uint32_t cvtSearchSpacePosToASCII(uint32_t pos) {
-    // Use number range in ASCII table
     if (pos <= 9) {
+        // Use number range in ASCII table
         return 48 + pos;
+    } else if (pos <= 35) {
+        // Use uppercase in ASCII table
+        return 65 + (pos - 10);
     } else {
         // Else use alphabet later in table
-        return 97 + (pos - 10);
+        return 97 + (pos - 10 - 26);
     }
 }
 
@@ -42,7 +45,9 @@ uint32_t cvtSearchSpacePosToASCII(uint32_t pos) {
 void incSearchSpaceSlot(char& pos) {
     // If at end of numbers 0-9 in ASCII
     if (pos == '9') {
-        // Skip to 'a'
+        // Skip to 'A'
+        pos = 'A';
+    } else if (pos == 'Z') {
         pos = 'a';
     } else {
         // Increment normally
@@ -478,16 +483,17 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
 
 int main(int argc, char* argv[]) {
     std::vector<std::string> args(argv + 1, argv + argc + !argc);
-    uint32_t threadCount = 20;
+    constexpr uint32_t kNumThreads = 20;
+    constexpr double kNumSymbols = 36.0;
 
     if (!(args.size() >= 2 &&
           (args[0] == "brute" || args[0] == "dict" || args[0] == "combo"))) {
         std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
                      "|benchmark(#))\n"
                      "There are "
-                  << threadCount << " possible work units "
+                  << kNumThreads << " possible work units "
                                     "(0.."
-                  << threadCount - 1
+                  << kNumThreads - 1
                   << " inclusive). Pass a space delimited list of the ones to "
                      "run. Append a number to the benchmark command to run it "
                      "in that many threads. Valid numbers are 0 through 9 "
@@ -548,9 +554,9 @@ int main(int argc, char* argv[]) {
             // Spawn worker threads
             for (uint32_t i = 1; i < args.size(); i++) {
                 uint32_t beginPos =
-                    std::round(std::stoi(args[i]) * (36.0 / threadCount));
+                    std::round(std::stoi(args[i]) * (kNumSymbols / kNumThreads));
                 uint32_t endPos = std::round((std::stoi(args[i]) + 1) *
-                                             (36.0 / threadCount)) -
+                                             (kNumSymbols / kNumThreads)) -
                                   1;
 
                 threads.emplace_back(runBruteforce, beginPos, endPos, 16, i);
@@ -570,10 +576,10 @@ int main(int argc, char* argv[]) {
             for (uint32_t i = 1; i < args.size(); i++) {
                 uint32_t beginPos = std::floor(
                     std::stoi(args[i]) *
-                    (static_cast<float>(words.size()) / threadCount));
+                    (static_cast<float>(words.size()) / kNumThreads));
                 uint32_t endPos = std::ceil((std::stoi(args[i]) + 1) *
                                             (static_cast<float>(words.size()) /
-                                             threadCount)) -
+                                             kNumThreads)) -
                                   1;
 
                 threads.emplace_back(runDictionary, beginPos, endPos, 999999999,
@@ -593,10 +599,10 @@ int main(int argc, char* argv[]) {
             for (uint32_t i = 1; i < args.size(); i++) {
                 uint32_t beginPos = std::floor(
                     std::stoi(args[i]) *
-                    (static_cast<float>(words.size()) / threadCount));
+                    (static_cast<float>(words.size()) / kNumThreads));
                 uint32_t endPos = std::ceil((std::stoi(args[i]) + 1) *
                                             (static_cast<float>(words.size()) /
-                                             threadCount)) -
+                                             kNumThreads)) -
                                   1;
 
                 threads.emplace_back(runCombo, beginPos, endPos, 1000, i);
