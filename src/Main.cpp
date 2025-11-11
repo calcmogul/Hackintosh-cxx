@@ -1,4 +1,4 @@
-// Copyright (c) Tyler Veness 2015-2017. All Rights Reserved.
+// Copyright (c) Tyler Veness
 
 #include <stdint.h>
 
@@ -14,8 +14,6 @@
 #include <vector>
 
 #include "MD5.hpp"
-
-using namespace std::chrono;
 
 std::vector<std::string> words;
 
@@ -213,7 +211,9 @@ void runBruteforce(uint32_t beginPos, uint32_t endPos, int maximum,
     }
 
     std::cout << "elapsed: "
-              << duration_cast<milliseconds>(clock::now() - startTime).count() /
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     clock::now() - startTime)
+                         .count() /
                      1000.f
               << "s" << std::endl;
 }
@@ -281,8 +281,8 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
     }
 
     // Prepare timing for checkpoints
-    using clock = std::chrono::system_clock;
-    time_point<clock> startTime = clock::now();
+    std::chrono::time_point<std::chrono::system_clock> startTime =
+        std::chrono::system_clock::now();
 
     for (int currentNum = std::stoi(numSuffix); currentNum <= maximum;
          currentNum++) {
@@ -326,7 +326,9 @@ void runDictionary(uint32_t dictBegin, uint32_t dictEnd, int maximum,
     }
 
     std::cout << "elapsed: "
-              << duration_cast<milliseconds>(clock::now() - startTime).count() /
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     std::chrono::system_clock::now() - startTime)
+                         .count() /
                      1000.f
               << "s" << std::endl;
 }
@@ -391,8 +393,8 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
     }
 
     // Prepare timing for checkpoints
-    using clock = std::chrono::system_clock;
-    time_point<clock> startTime = clock::now();
+    std::chrono::time_point<std::chrono::system_clock> startTime =
+        std::chrono::system_clock::now();
 
     std::string numStr;
     for (uint32_t i = dictBegin; i <= dictEnd; i++) {
@@ -476,7 +478,9 @@ void runCombo(uint32_t dictBegin, uint32_t dictEnd, int maximum, int affinity) {
     }
 
     std::cout << "elapsed: "
-              << duration_cast<milliseconds>(clock::now() - startTime).count() /
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     std::chrono::system_clock::now() - startTime)
+                         .count() /
                      1000.f
               << "s" << std::endl;
 }
@@ -491,8 +495,7 @@ int main(int argc, char* argv[]) {
         std::cout << "usage: Hackintosh-cxx (brute|dict|combo) (<WU> [<WU>...]"
                      "|benchmark(#))\n"
                      "There are "
-                  << kNumThreads << " possible work units "
-                                    "(0.."
+                  << kNumThreads << " possible work units (0.."
                   << kNumThreads - 1
                   << " inclusive). Pass a space delimited list of the ones to "
                      "run. Append a number to the benchmark command to run it "
@@ -553,8 +556,8 @@ int main(int argc, char* argv[]) {
         } else {
             // Spawn worker threads
             for (uint32_t i = 1; i < args.size(); i++) {
-                uint32_t beginPos =
-                    std::round(std::stoi(args[i]) * (kNumSymbols / kNumThreads));
+                uint32_t beginPos = std::round(std::stoi(args[i]) *
+                                               (kNumSymbols / kNumThreads));
                 uint32_t endPos = std::round((std::stoi(args[i]) + 1) *
                                              (kNumSymbols / kNumThreads)) -
                                   1;

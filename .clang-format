@@ -47,12 +47,26 @@ DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
 IncludeCategories:
-  - Regex:           '^<.*\.h>'
-    Priority:        1
-  - Regex:           '^<.*'
-    Priority:        2
-  - Regex:           '.*'
-    Priority:        3
+  # C standard library headers
+  #
+  # https://en.cppreference.com/w/cpp/header:
+  #  * C compatibility headers
+  #  * Special C compatibility headers
+  #  * Empty C headers
+  #  * Meaningless C headers
+  #  * Unsupported C headers
+  - Regex:        '^<(assert\.h|ctype\.h|errno\.h|fenv\.h|float\.h|inttypes\.h|limits\.h|locale\.h|math\.h|setjmp\.h|signal\.h|stdarg\.h|stddef\.h|stdint\.h|stdio\.h|stdlib\.h|string\.h|time\.h|uchar\.h|wchar\.h|wctype\.h|stdatomic\.h|ccomplex|complex\.h|ctgmath|tgmath\.h|ciso646|cstdalign|cstdbool|iso646\.h|stdalign\.h|stdbool\.h|stdatomic\.h|stdnoreturn\.h|threads\.h)>'
+    Priority:     1
+  # C++ standard library headers (lowercase and underscores with no .h suffix)
+  - Regex:        '^<[a-z_]+>'
+    Priority:     2
+  # Other library headers (angle brackets)
+  - Regex:        '^<.*'
+    Priority:     3
+  # Project headers (double quotes)
+  - Regex:        '^".*'
+    Priority:     4
+IncludeIsMainRegex: '(Test|_test)?$'
 IndentCaseLabels: true
 IndentWidth:     4
 IndentWrappedFunctionNames: false
@@ -72,7 +86,7 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 200
 PointerAlignment: Left
 ReflowComments:  true
-SortIncludes:    true
+SortIncludes: true
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: ControlStatements
