@@ -1,11 +1,3 @@
-cppHeaderFileInclude {
-  \.hpp$
-}
-
-cppSrcFileInclude {
-  \.cpp$
-}
-
 generatedFileExclude {
   \.txt$
   Hackintosh-cxx$
